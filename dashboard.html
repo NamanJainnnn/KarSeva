@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <script>
+  (function(){
+    const t = localStorage.getItem('ksTheme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KarSeva — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+    [data-theme="dark"]{
+      --bg:#0A0F0D;--surface:#111714;--surface2:#182018;--border:#1E2B22;
+      --accent:#00C896;--accent-dim:rgba(0,200,150,.12);--accent-border:rgba(0,200,150,.28);
+      --text:#F0FFF8;--muted:#7A9E8A;--danger:#EF4444;--danger-dim:rgba(239,68,68,.1);
+      --warning:#F5A623;--warning-dim:rgba(245,166,35,.1);
+      --nav-bg:rgba(10,15,13,.9);
+    }
+    [data-theme="light"]{
+      --bg:#F2FCF7;--surface:#FFFFFF;--surface2:#E8F5EE;--border:#C8E6D6;
+      --accent:#009E72;--accent-dim:rgba(0,158,114,.10);--accent-border:rgba(0,158,114,.32);
+      --text:#071A0F;--muted:#3D7A58;--danger:#DC2626;--danger-dim:rgba(220,38,38,.08);
+      --warning:#D97706;--warning-dim:rgba(217,119,6,.1);
+      --nav-bg:rgba(242,252,247,.92);
+    }
+
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;transition:background .35s,color .35s;}
+    a{text-decoration:none;color:inherit;}
+
+    /* ── SIDEBAR ── */
+    .sidebar{
+      position:fixed;top:0;left:0;bottom:0;width:240px;
+      background:var(--surface);border-right:1px solid var(--border);
+      display:flex;flex-direction:column;padding:24px 16px;
+      z-index:100;transition:background .35s,border-color .35s;
+    }
+
+    .sidebar-logo{font-size:20px;font-weight:800;letter-spacing:-.02em;padding:0 12px;margin-bottom:32px;}
+    .sidebar-logo span{color:var(--accent);}
+
+    .nav-section-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 12px;margin-bottom:8px;margin-top:20px;}
+
+    .nav-item{
+      display:flex;align-items:center;gap:12px;
+      padding:10px 12px;border-radius:10px;
+      font-size:14px;font-weight:500;color:var(--muted);
+      cursor:pointer;transition:background .2s,color .2s;
+      margin-bottom:2px;
+    }
+    .nav-item:hover{background:var(--surface2);color:var(--text);}
+    .nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:700;}
+    .nav-item.active .nav-icon{color:var(--accent);}
+    .nav-icon{font-size:17px;width:20px;text-align:center;}
+
+    .nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;}
+
+    .sidebar-bottom{margin-top:auto;}
+    .user-card{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:10px;
+      border:1px solid var(--border);
+      cursor:pointer;transition:border-color .2s;
+    }
+    .user-card:hover{border-color:var(--accent);}
+    .user-av{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .user-name{font-size:13px;font-weight:700;line-height:1.2;}
+    .user-role{font-size:11px;color:var(--muted);}
+
+    /* ── MAIN ── */
+    .main{margin-left:240px;padding:32px;min-height:100vh;}
+
+    /* ── TOPBAR ── */
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+    .topbar-left h1{font-size:22px;font-weight:800;letter-spacing:-.01em;}
+    .topbar-left p{font-size:14px;color:var(--muted);margin-top:2px;}
+
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+
+    .theme-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:border-color .2s;}
+    .theme-toggle:hover{border-color:var(--accent);}
+
+    /* availability toggle */
+    .avail-wrap{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;}
+    .avail-label{font-size:13px;font-weight:600;}
+    .toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+    .toggle-switch input{opacity:0;width:0;height:0;}
+    .toggle-track{position:absolute;inset:0;background:var(--border);border-radius:99px;cursor:pointer;transition:background .25s;}
+    .toggle-track::after{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .25s;}
+    .toggle-switch input:checked + .toggle-track{background:var(--accent);}
+    .toggle-switch input:checked + .toggle-track::after{transform:translateX(18px);}
+    .avail-status{font-size:12px;font-weight:600;color:var(--muted);}
+    .avail-status.on{color:var(--accent);}
+
+    /* ── EMERGENCY ALERT ── */
+    .emergency-banner{
+      background:var(--danger-dim);border:1px solid rgba(239,68,68,.3);
+      border-radius:14px;padding:16px 20px;
+      display:flex;align-items:center;gap:16px;
+      margin-bottom:24px;
+    }
+    .emergency-banner.hidden{display:none;}
+    .em-dot{width:10px;height:10px;border-radius:50%;background:var(--danger);flex-shrink:0;animation:blink 1.4s infinite;}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+    .em-text{font-size:14px;font-weight:700;color:var(--danger);}
+    .em-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+    .em-btn{margin-left:auto;padding:8px 16px;border-radius:8px;background:var(--danger);color:#fff;font-size:13px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;white-space:nowrap;}
+
+    /* ── STAT CARDS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color .2s,background .35s;}
+    .stat-card:hover{border-color:var(--accent);}
+    .stat-card-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;}
+    .stat-card-num{font-size:28px;font-weight:800;color:var(--accent);line-height:1;}
+    .stat-card-sub{font-size:12px;color:var(--muted);margin-top:6px;}
+    .stat-card-icon{font-size:20px;margin-bottom:10px;}
+
+    /* ── GRID LAYOUT ── */
+    .dash-grid{display:grid;grid-template-columns:1fr 340px;gap:20px;}
+
+    /* ── SECTION CARD ── */
+    .section-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;transition:background .35s,border-color .35s;}
+    .section-card:last-child{margin-bottom:0;}
+    .sc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .sc-title{font-size:16px;font-weight:800;}
+    .sc-link{font-size:13px;color:var(--accent);font-weight:600;cursor:pointer;}
+
+    /* ── TASK CARDS ── */
+    .task-item{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);}
+    .task-item:last-child{border-bottom:none;padding-bottom:0;}
+    .task-icon{width:40px;height:40px;border-radius:10px;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .task-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+    .task-meta{font-size:12px;color:var(--muted);}
+    .task-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+    .task-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;}
+    .task-status.assigned{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+    .task-status.urgent{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,.3);}
+    .task-status.completed{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+    .task-pts{font-size:12px;font-weight:700;color:var(--warning);}
+
+    /* ── BADGES ── */
+    .badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .badge-item{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;transition:border-color .2s;}
+    .badge-item:hover{border-color:var(--accent);}
+    .badge-item.locked{opacity:.4;}
+    .badge-emoji{font-size:26px;margin-bottom:6px;}
+    .badge-name{font-size:11px;font-weight:700;color:var(--text);}
+    .badge-pts{font-size:10px;color:var(--muted);margin-top:2px;}
+
+    /* ── LEADERBOARD MINI ── */
+    .lb-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+    .lb-row:last-child{border-bottom:none;padding-bottom:0;}
+    .lb-rank{font-size:14px;font-weight:800;width:22px;color:var(--muted);}
+    .lb-rank.gold{color:#F5A623;}
+    .lb-rank.silver{color:#A0A0A0;}
+    .lb-rank.bronze{color:#CD7F32;}
+    .lb-av{width:30px;height:30px;border-radius:8px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .lb-name{font-size:13px;font-weight:600;flex:1;}
+    .lb-pts{font-size:13px;font-weight:800;color:var(--accent);}
+    .lb-you{font-size:10px;font-weight:700;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);padding:2px 7px;border-radius:99px;}
+
+    /* ── ACTIVITY FEED ── */
+    .activity-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+    .activity-item:last-child{border-bottom:none;padding-bottom:0;}
+    .act-icon{width:32px;height:32px;border-radius:8px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+    .act-text{font-size:13px;color:var(--text);line-height:1.5;}
+    .act-time{font-size:11px;color:var(--muted);margin-top:2px;}
+
+    /* loading state */
+    .skeleton{background:var(--surface2);border-radius:8px;animation:shimmer 1.5s infinite;}
+    @keyframes shimmer{0%,100%{opacity:.6;}50%{opacity:1;}}
+
+    /* empty state */
+    .empty-state{text-align:center;padding:32px;color:var(--muted);}
+    .empty-icon{font-size:36px;margin-bottom:10px;}
+    .empty-text{font-size:14px;}
+
+    @media(max-width:900px){
+      .sidebar{display:none;}
+      .main{margin-left:0;padding:20px;}
+      .stats-grid{grid-template-columns:1fr 1fr;}
+      .dash-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+  <div class="sidebar-logo">Kar<span>Seva</span></div>
+
+  <div class="nav-section-label">Main</div>
+  <div class="nav-item active"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="window.location.href='tasks.html'"><span class="nav-icon">✅</span> My Tasks <span class="nav-badge" id="taskBadge">2</span></div>
+  <div class="nav-item" onclick="window.location.href='community.html'"><span class="nav-icon">👥</span> Community</div>
+  <div class="nav-item" onclick="window.location.href='leaderboard.html'"><span class="nav-icon">🏅</span> Leaderboard</div>
+  <div class="nav-item" onclick="window.location.href='donate.html'"><span class="nav-icon">❤️</span> Donate</div>
+  <div class="nav-item" onclick="window.location.href='admin.html'" id="adminNav" style="display:none;"><span class="nav-icon">🧠</span> Admin Panel</div>
+
+  <div class="nav-section-label">Account</div>
+  <div class="nav-item" onclick="location.href='PROFILE.html'"><span class="nav-icon">👤</span> My Profile</div>
+  <div class="nav-item" onclick="location.href='settings.html'"><span class="nav-icon">⚙️</span> Settings</div>
+  <div class="nav-item" id="myNgoTab" style="display:none;" onclick="location.href='ngoprofile.html'">
+  <span class="nav-icon">🏛️</span> My NGO
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-card" id="sidebarUser">
+      <div class="user-av" id="sidebarAv">--</div>
+      <div>
+        <div class="user-name" id="sidebarName">Loading...</div>
+        <div class="user-role">Volunteer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="welcomeMsg">Welcome back! 👋</h1>
+      <p id="welcomeSub">Here's what's happening today</p>
+    </div>
+    <div class="topbar-right">
+      <!-- availability toggle -->
+      <div class="avail-wrap">
+        <span class="avail-label">Available</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="availToggle" checked onchange="toggleAvailability()"/>
+          <span class="toggle-track"></span>
+        </label>
+        <span class="avail-status on" id="availStatus">On</span>
+      </div>
+      <button class="theme-toggle" id="themeBtn">🌙</button>
+    </div>
+  </div>
+
+  <!-- EMERGENCY ALERT BANNER -->
+  <div class="emergency-banner hidden" id="emergencyBanner">
+    <div class="em-dot"></div>
+    <div>
+      <div class="em-text">🚨 Emergency Alert — Bhopal</div>
+      <div class="em-sub">HelpFirst NGO needs 8 volunteers for flood relief immediately</div>
+    </div>
+    <button class="em-btn">Respond Now</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-icon">⭐</div>
+      <div class="stat-card-label">Total Points</div>
+      <div class="stat-card-num" id="statPoints">0</div>
+      <div class="stat-card-sub">Keep completing tasks!</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-icon">✅</div>
+      <div class="stat-card-label">Tasks Done</div>
+      <div class="stat-card-num" id="statTasks">0</div>
+      <div class="stat-card-sub">Tasks completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-icon">🏅</div>
+      <div class="stat-card-label">Badges</div>
+      <div class="stat-card-num" id="statBadges">0</div>
+      <div class="stat-card-sub">Badges earned</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-icon">📍</div>
+      <div class="stat-card-label">Your City</div>
+      <div class="stat-card-num" style="font-size:18px;" id="statCity">--</div>
+      <div class="stat-card-sub">Active region</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="dash-grid">
+
+    <!-- LEFT COLUMN -->
+    <div>
+      <!-- ACTIVE TASKS -->
+      <div class="section-card">
+        <div class="sc-header">
+          <div class="sc-title">My Active Tasks</div>
+          <div class="sc-link">View all →</div>
+        </div>
+        <div id="tasksList">
+          <div class="task-item">
+            <div class="task-icon">🏥</div>
+            <div>
+              <div class="task-name">Medical Camp Assistance</div>
+              <div class="task-meta">HelpFirst India · Indore · Today 10am</div>
+            </div>
+            <div class="task-right">
+              <span class="task-status urgent">Urgent</span>
+              <span class="task-pts">+150 pts</span>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-icon">📚</div>
+            <div>
+              <div class="task-name">Teach at Community School</div>
+              <div class="task-meta">Seva Sangam · Bhopal · Tomorrow 9am</div>
+            </div>
+            <div class="task-right">
+              <span class="task-status assigned">Assigned</span>
+              <span class="task-pts">+100 pts</span>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-icon">🌱</div>
+            <div>
+              <div class="task-name">Tree Plantation Drive</div>
+              <div class="task-meta">Green Roots · Pune · Saturday</div>
+            </div>
+            <div class="task-right">
+              <span class="task-status assigned">Assigned</span>
+              <span class="task-pts">+80 pts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT ACTIVITY -->
+      <div class="section-card">
+        <div class="sc-header">
+          <div class="sc-title">Recent Activity</div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon">🤖</div>
+          <div>
+            <div class="act-text">AI matched you to <b>Medical Camp Assistance</b> based on your first aid skills</div>
+            <div class="act-time">2 hours ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon">🏅</div>
+          <div>
+            <div class="act-text">You earned the <b>First Responder</b> badge for completing 3 tasks</div>
+            <div class="act-time">Yesterday</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon">✅</div>
+          <div>
+            <div class="act-text">Completed <b>Food Distribution Drive</b> — +120 points added</div>
+            <div class="act-time">2 days ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon">👥</div>
+          <div>
+            <div class="act-text">Joined <b>Bhopal Volunteers Group</b> — 48 members</div>
+            <div class="act-time">3 days ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+      <!-- BADGES -->
+      <div class="section-card">
+        <div class="sc-header">
+          <div class="sc-title">My Badges</div>
+          <div class="sc-link">All badges →</div>
+        </div>
+        <div class="badges-grid">
+          <div class="badge-item">
+            <div class="badge-emoji">🚀</div>
+            <div class="badge-name">First Step</div>
+            <div class="badge-pts">50 pts</div>
+          </div>
+          <div class="badge-item">
+            <div class="badge-emoji">🏅</div>
+            <div class="badge-name">Responder</div>
+            <div class="badge-pts">150 pts</div>
+          </div>
+          <div class="badge-item">
+            <div class="badge-emoji">⭐</div>
+            <div class="badge-name">Star Volunteer</div>
+            <div class="badge-pts">300 pts</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-emoji">🔥</div>
+            <div class="badge-name">On Fire</div>
+            <div class="badge-pts">500 pts</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-emoji">💎</div>
+            <div class="badge-name">Diamond</div>
+            <div class="badge-pts">1000 pts</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-emoji">👑</div>
+            <div class="badge-name">Legend</div>
+            <div class="badge-pts">2000 pts</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MINI LEADERBOARD -->
+      <div class="section-card">
+        <div class="sc-header">
+          <div class="sc-title">Leaderboard</div>
+          <div class="sc-link" onclick="window.location.href='leaderboard.html'">Full board →</div>
+        </div>
+       
+        <!-- REPLACE WITH: -->
+        <div id="miniLeaderboard"></div>
+        
+        <div class="lb-row" style="background:var(--accent-dim);border-radius:8px;padding:10px 8px;margin-top:8px;">
+          <div class="lb-rank" style="color:var(--accent);" id="myRank">--</div>
+          <div class="lb-av" id="myLbAv" style="background:var(--accent);color:#0A0F0D;">--</div>
+          <div class="lb-name" id="myLbName">You</div>
+          <div class="lb-pts" id="myLbPts">0</div>
+          <div class="lb-you">You</div>
+        </div>
+      </div>
+
+      <!-- LOGOUT -->
+      <div class="section-card" style="text-align:center;">
+        <button onclick="handleLogout()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:border-color .2s,color .2s;" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+          Sign Out
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, updateDoc, collection, query, where, onSnapshot, serverTimestamp, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBM1zpNgjrztamRcvRJlJZxZhUrHqx6xTo",
+    authDomain: "karseva-1fb4f.firebaseapp.com",
+    projectId: "karseva-1fb4f",
+    storageBucket: "karseva-1fb4f.firebasestorage.app",
+    messagingSenderId: "4741841467",
+    appId: "1:4741841467:web:780939d385e60af936521e"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  let currentUser = null;
+  let dashboardAssignments = [];
+  let dashboardTasks = [];
+  let dashboardUnsubs = [];
+  let shownDashboardAlertId = null;
+  let currentActiveAlertId = null;
+
+  function ensureStatusModal() {
+    if (document.getElementById('appStatusModal')) return;
+    document.body.insertAdjacentHTML('beforeend', `
+      <div id="appStatusModal" style="display:none;position:fixed;inset:0;background:rgba(10,15,13,.55);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="width:min(460px,100%);background:var(--surface);border:1px solid var(--accent-border);border-radius:18px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.35);">
+          <div style="font-size:14px;font-weight:800;color:var(--accent);margin-bottom:12px;">KarSeva Update</div>
+          <div id="appStatusMessage" style="font-size:14px;color:var(--text);line-height:1.7;margin-bottom:18px;"></div>
+          <button type="button" onclick="document.getElementById('appStatusModal').style.display='none'" style="padding:12px 22px;border-radius:10px;background:var(--accent);color:#0A0F0D;font-size:14px;font-weight:800;font-family:Inter,sans-serif;border:none;cursor:pointer;">Close</button>
+        </div>
+      </div>
+    `);
+  }
+
+  function showStatusModal(message) {
+    ensureStatusModal();
+    document.getElementById('appStatusMessage').textContent = message;
+    document.getElementById('appStatusModal').style.display = 'flex';
+  }
+
+  function renderDashboardAlert(alertItem, profileCity = '') {
+    const banner = document.getElementById('emergencyBanner');
+    if (!banner) return;
+
+    if (!alertItem || alertItem.active === false) {
+      banner.classList.add('hidden');
+      shownDashboardAlertId = null;
+      currentActiveAlertId = null;
+      return;
+    }
+
+    const alertCity = String(alertItem.city || 'All Cities');
+    const normalizedAlertCity = alertCity.trim().toLowerCase();
+    const normalizedProfileCity = String(profileCity || '').trim().toLowerCase();
+    const appliesToUser = !normalizedAlertCity || normalizedAlertCity === 'all cities' || normalizedAlertCity === normalizedProfileCity;
+
+    if (!appliesToUser) {
+      banner.classList.add('hidden');
+      return;
+    }
+
+    const textEl = banner.querySelector('.em-text');
+    const subEl = banner.querySelector('.em-sub');
+    const actionBtn = banner.querySelector('.em-btn');
+    if (textEl) textEl.textContent = `Emergency Alert — ${alertCity}`;
+    if (subEl) subEl.textContent = alertItem.message || 'Urgent volunteer help is needed right now.';
+    if (actionBtn) actionBtn.onclick = () => window.respondToEmergency();
+    banner.classList.remove('hidden');
+    currentActiveAlertId = alertItem.id;
+
+    if (shownDashboardAlertId !== alertItem.id && localStorage.getItem('karsevaAlertShown') !== alertItem.id) {
+      shownDashboardAlertId = alertItem.id;
+      localStorage.setItem('karsevaAlertShown', alertItem.id);
+      showStatusModal(`${alertCity}: ${alertItem.message || 'Urgent volunteer help is needed right now.'}`);
+    }
+  }
+  let showAllCompleted = false;
+
+  function renderDashboardAssignments() {
+    const list = document.getElementById('tasksList');
+    const badge = document.getElementById('taskBadge');
+    if (!list) return;
+
+    const activeAssignments = dashboardAssignments.filter(a => a.status === 'assigned');
+    let completedAssignments = dashboardAssignments
+      .filter(a => a.status === 'completed')
+      .sort((a, b) => (b.completedAt?.seconds || 0) - (a.completedAt?.seconds || 0));
+
+    document.getElementById('statTasks').textContent = completedAssignments.length;
+    if (badge) badge.textContent = activeAssignments.length;
+
+    const displayedCompleted = showAllCompleted ? completedAssignments : completedAssignments.slice(0, 2);
+
+    // Build "See All Completed Tasks" button if there are more than 2
+    const seeAllBtn = completedAssignments.length > 2 ? `
+      <div style="text-align:right;margin-bottom:8px;">
+        <button id="seeAllCompletedBtn" type="button" onclick="window.toggleAllCompleted()"
+          style="font-size:12px;font-weight:700;color:var(--accent);background:none;border:none;cursor:pointer;font-family:Inter,sans-serif;">
+          ${showAllCompleted ? '↑ Show Less' : 'See All Completed Tasks (' + completedAssignments.length + ') →'}
+        </button>
+      </div>` : '';
+
+    const makeRow = (a) => {
+      const task = dashboardTasks.find(t => t.id === a.taskId) || {};
+      const title = a.taskTitle || task.title || 'Assigned Task';
+      const ngo = task.ngo || 'KarSeva';
+      const city = task.city || 'India';
+      const when = task.scheduledAt || 'Scheduled soon';
+      const statusClass = a.status === 'completed' ? 'completed' : ((task.urgency || '').toLowerCase() === 'high' ? 'urgent' : 'assigned');
+      const statusText = a.status === 'completed' ? 'Completed' : ((task.urgency || '').toLowerCase() === 'high' ? 'Urgent' : 'Assigned');
+      return `
+        <div class="task-item">
+          <div class="task-icon">✅</div>
+          <div>
+            <div class="task-name">${title}</div>
+            <div class="task-meta">${ngo} · ${city} · ${when}</div>
+          </div>
+          <div class="task-right">
+            <span class="task-status ${statusClass}">${statusText}</span>
+            ${a.status !== 'completed' ? `<button class="em-btn" type="button" style="margin-left:0;background:var(--accent);color:#0A0F0D;" onclick="markTaskComplete('${a.id}')">Mark as Completed</button>` : ''}
+          </div>
+        </div>`;
+    };
+
+    const rows = [...activeAssignments, ...displayedCompleted].map(makeRow).join('');
+    list.innerHTML = (seeAllBtn + rows) || '<div style="color:var(--muted);font-size:14px;">No assigned tasks yet.</div>';
+  }
+
+  window.toggleAllCompleted = () => {
+    showAllCompleted = !showAllCompleted;
+    renderDashboardAssignments();
+  };
+
+  function startDashboardRealtime(uid, profileCity = '') {
+    dashboardUnsubs.forEach(unsub => { try { unsub(); } catch (e) {} });
+    dashboardUnsubs = [];
+
+    dashboardUnsubs.push(onSnapshot(doc(db, 'users', uid), (snap) => {
+      if (!snap.exists()) return;
+      const profile = snap.data() || {};
+      currentUser = { ...(currentUser || {}), uid };
+      document.getElementById('statPoints').textContent = (profile.points || 0).toLocaleString();
+      document.getElementById('myLbPts').textContent = (profile.points || 0).toLocaleString();
+      document.getElementById('statBadges').textContent = Array.isArray(profile.badges) ? profile.badges.length : 0;
+    }));
+
+    dashboardUnsubs.push(onSnapshot(query(collection(db, 'assignments'), where('assignedTo', '==', uid)), (snap) => {
+      dashboardAssignments = [];
+      snap.forEach(d => dashboardAssignments.push({ id: d.id, ...d.data() }));
+      renderDashboardAssignments();
+    }));
+
+    dashboardUnsubs.push(onSnapshot(collection(db, 'tasks'), (snap) => {
+      dashboardTasks = [];
+      snap.forEach(d => dashboardTasks.push({ id: d.id, ...d.data() }));
+      renderDashboardAssignments();
+    }));
+
+    dashboardUnsubs.push(onSnapshot(collection(db, 'alerts'), (snap) => {
+      const alerts = [];
+      snap.forEach(d => alerts.push({ id: d.id, ...d.data() }));
+      alerts.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      const activeAlert = alerts.find(alertItem => alertItem.active !== false);
+      renderDashboardAlert(activeAlert || null, profileCity);
+    }));
+
+    // Fix 2E: Real-time application status updates
+    dashboardUnsubs.push(onSnapshot(query(collection(db, 'applications'), where('applicantId', '==', uid)), (snap) => {
+      snap.docChanges().forEach(change => {
+        const app = change.doc.data() || {};
+        if (change.type === 'modified') {
+          if (app.status === 'approved') {
+            showStatusModal(`Task assigned successfully: "${app.taskTitle || 'Your task'}" has been approved!`);
+          } else if (app.status === 'rejected') {
+            showStatusModal(`Task request rejected: Your application for "${app.taskTitle || 'a task'}" was not approved.`);
+          }
+        }
+      });
+    }));
+  //bugfixx
+  const AV_COLORS = ['#F5A623','#00C896','#7C5CFF','#E65C00','#00A8E8'];
+    dashboardUnsubs.push(onSnapshot(query(collection(db, 'users'), where('role', '==', 'volunteer')), (snap) => {
+      const users = [];
+      snap.forEach(d => users.push({ id: d.id, ...d.data() }));
+      users.sort((a, b) => (b.points || 0) - (a.points || 0));
+      const top3 = users.slice(0, 3);
+      const container = document.getElementById('miniLeaderboard');
+      if (!container) return;
+      const rankClass = ['gold', 'silver', 'bronze'];
+      container.innerHTML = top3.map((u, i) => {
+        const initials = (((u.firstName||'')[0]||'') + ((u.lastName||'')[0]||'')).toUpperCase() || '??';
+        const color = AV_COLORS[i % AV_COLORS.length];
+        const isYou = u.id === uid;
+        return `<div class="lb-row">
+          <div class="lb-rank ${rankClass[i]}">${i + 1}</div>
+          <div class="lb-av" style="background:${color};color:#0A0F0D;">${initials}</div>
+          <div class="lb-name">${u.firstName || ''} ${u.lastName || ''}${isYou ? ' <span class="lb-you">You</span>' : ''}</div>
+          <div class="lb-pts">${(u.points || 0).toLocaleString()}</div>
+        </div>`;
+      }).join('');
+      // update myRank
+      const myIdx = users.findIndex(u => u.id === uid);
+      if (myIdx !== -1) document.getElementById('myRank').textContent = myIdx + 1;
+    }));
+  
+  }
+
+  window.markTaskComplete = async (assignmentId) => {
+    if (!assignmentId) return;
+    try {
+      const assignmentRef = doc(db, 'assignments', assignmentId);
+      const assignmentSnap = await getDoc(assignmentRef);
+      if (!assignmentSnap.exists()) {
+        showStatusModal('Assignment not found.');
+        return;
+      }
+
+      const assignmentData = assignmentSnap.data() || {};
+      await updateDoc(assignmentRef, {
+        status: 'completed',
+        completedAt: serverTimestamp()
+      });
+
+      if (assignmentData.assignedTo) {
+        await updateDoc(doc(db, 'users', assignmentData.assignedTo), {
+          points: increment(10),
+          tasksCompleted: increment(1)
+        });
+      }
+
+      showStatusModal('Task marked as completed. Great work.');
+    } catch (e) {
+      console.error(e);
+      showStatusModal('Could not mark this task as completed. Please try again.');
+    }
+  };
+
+  window.respondToEmergency = async () => {
+    if (!currentUser?.uid || !currentActiveAlertId) return;
+    try {
+      await updateDoc(doc(db, 'alerts', currentActiveAlertId), {
+        responders: arrayUnion(currentUser.uid)
+      });
+      showStatusModal('You have been marked as a responder for this emergency alert.');
+    } catch (e) {
+      console.error(e);
+      showStatusModal('Could not register your emergency response. Please try again.');
+    }
+  };
+
+  // -- AUTH GUARD � if not logged in, go to auth page --
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = 'auth.html';
+      return;
+    }
+
+    currentUser = user;
+
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const profile = snap.exists() ? snap.data() : {};
+
+    const firstName = profile.firstName || user.displayName?.split(' ')[0] || 'Volunteer';
+    const lastName  = profile.lastName  || '';
+    const city      = profile.city      || 'India';
+    const points    = profile.points    || 0;
+    const badges    = profile.badges    || [];
+    const available = profile.available !== false;
+    const initials  = (firstName[0] + (lastName[0] || '')).toUpperCase();
+
+    document.getElementById('welcomeMsg').textContent   = `Welcome back, ${firstName}!`;
+    document.getElementById('welcomeSub').textContent   = `${city} 📍 ${new Date().toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long'})}`;
+    document.getElementById('sidebarName').textContent  = `${firstName} ${lastName}`.trim();
+    document.getElementById('sidebarAv').textContent    = initials;
+    document.getElementById('statPoints').textContent   = points.toLocaleString();
+    document.getElementById('statBadges').textContent   = badges.length;
+    document.getElementById('statCity').textContent     = city;
+    document.getElementById('myLbAv').textContent       = initials;
+    document.getElementById('myLbName').textContent     = firstName;
+    document.getElementById('myLbPts').textContent      = points.toLocaleString();
+
+    if (profile.role === 'ngo') {
+      document.getElementById('adminNav').style.display = 'flex';
+      const ngoTab = document.getElementById('myNgoTab');
+      if (ngoTab) ngoTab.style.display = profile.role === 'ngo' ? 'flex' : 'none';
+    }
+
+    document.getElementById('availToggle').checked = available;
+    document.getElementById('availStatus').textContent = available ? 'On' : 'Off';
+    document.getElementById('availStatus').className   = available ? 'avail-status on' : 'avail-status';
+
+    ensureStatusModal();
+    startDashboardRealtime(user.uid, city);
+  });
+
+  // toggle availability and save to Firestore
+  window.toggleAvailability = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const isOn = document.getElementById('availToggle').checked;
+    document.getElementById('availStatus').textContent = isOn ? 'On' : 'Off';
+    document.getElementById('availStatus').className   = isOn ? 'avail-status on' : 'avail-status';
+    await updateDoc(doc(db, 'users', user.uid), { available: isOn });
+  };
+
+  // logout
+  window.handleLogout = async () => {
+    await signOut(auth);
+    window.location.href = 'auth.html';
+  };
+
+  // theme toggle
+  document.getElementById('themeBtn').addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = dark ? 'light' : 'dark';
+
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+
+  localStorage.setItem('ksTheme', next);
+});
+</script>
+
+<script>
+/* ── KARSEVA MAGIC DYNAMICS ── */
+(function(){
+  /* ── SCROLL REVEAL ── */
+  const style=document.createElement('style');
+  style.textContent=`
+    .ks-reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal.ks-in{opacity:1;transform:none;}
+    .ks-reveal-l{opacity:0;transform:translateX(-30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-l.ks-in{opacity:1;transform:none;}
+    .ks-reveal-r{opacity:0;transform:translateX(30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-r.ks-in{opacity:1;transform:none;}
+    @keyframes ks-shimmer{0%,100%{opacity:.55}50%{opacity:1}}
+    @keyframes ks-popIn{0%{opacity:0;transform:scale(.85) translateY(16px)}100%{opacity:1;transform:none}}
+    @keyframes ks-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes ks-pulse-ring{0%{box-shadow:0 0 0 0 rgba(0,200,150,.4)}70%{box-shadow:0 0 0 10px rgba(0,200,150,0)}100%{box-shadow:0 0 0 0 rgba(0,200,150,0)}}
+    @keyframes ks-spin{to{transform:rotate(360deg)}}
+    .ks-float{animation:ks-float 3.5s ease-in-out infinite;}
+    .ks-pulse{animation:ks-pulse-ring 2s ease-out infinite;}
+    .ks-pop{animation:ks-popIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+    /* card hover lift */
+    .stat-card,.section-card,.f-card,.task-card,.ngo-card,.badge-item,.lb-table-wrap,.bw-item,.podium-card,.city-card,.tov-card,.auth-box,.form-card,.ai-panel,.post-card,.community-card,.donate-card{transition-property:transform,border-color,box-shadow,background!important;transition-duration:.28s!important;}
+    .stat-card:hover,.section-card:hover,.task-card:hover,.ngo-card:hover,.badge-item:hover,.bw-item:hover,.podium-card:hover,.city-card:hover,.tov-card:hover,.community-card:hover,.donate-card:hover{transform:translateY(-4px)!important;box-shadow:0 12px 32px rgba(0,200,150,.1)!important;}
+    .badge-item:hover .badge-emoji{display:inline-block;animation:ks-float 1.2s ease-in-out infinite;}
+    /* button shimmer */
+    .btn-submit,.btn-hero,.btn-post,.btn-cta1,.btn-match,.match-assign-btn,.btn-dashboard,.em-btn,.ai-rec-action{position:relative;overflow:hidden;}
+    .btn-submit::after,.btn-hero::after,.btn-post::after,.btn-cta1::after,.btn-match::after,.match-assign-btn::after,.btn-dashboard::after,.em-btn::after,.ai-rec-action::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);transform:translateX(-200%);transition:transform .45s;}
+    .btn-submit:hover::after,.btn-hero:hover::after,.btn-post:hover::after,.btn-cta1:hover::after,.btn-match:hover::after,.match-assign-btn:hover::after,.btn-dashboard:hover::after,.em-btn:hover::after,.ai-rec-action:hover::after{transform:translateX(200%);}
+    /* nav item left-bar indicator */
+    .nav-item.active{border-left:3px solid var(--accent);padding-left:9px;transition:all .2s;}
+    /* input focus ring */
+    .form-input:focus,.lb-search:focus{box-shadow:0 0 0 3px rgba(0,200,150,.15)!important;}
+    /* progress bar */
+    #ks-progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:9999;width:0%;transition:width .1s linear;box-shadow:0 0 6px rgba(0,200,150,.6);}
+    /* ripple */
+    .ks-ripple{position:absolute;border-radius:50%;background:rgba(0,200,150,.25);transform:scale(0);animation:ks-rippleAnim .55s linear;pointer-events:none;}
+    @keyframes ks-rippleAnim{to{transform:scale(4);opacity:0;}}
+  `;
+  document.head.appendChild(style);
+
+  /* ── PROGRESS BAR ── */
+  const pb=document.createElement('div');pb.id='ks-progress';document.body.prepend(pb);
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement.scrollHeight-innerHeight;
+    if(h>0) pb.style.width=(scrollY/h*100)+'%';
+  });
+
+  /* ── SCROLL REVEAL OBSERVER ── */
+  // tag eligible elements
+  const selectors=['.stat-card','.section-card','.task-card','.task-item','.lb-row:not(.header)','.badge-item','.bw-item','.podium-card','.city-card','.tov-card','.ngo-card','.f-card','.step-card','.activity-item','.pstat','.match-card','.donate-card','.community-card','.post-card','.ai-rec-card','.form-card','.auth-box','.ai-panel'];
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('ks-in'),i*40);
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:.08});
+  setTimeout(()=>{
+    document.querySelectorAll(selectors.join(',')).forEach((el,i)=>{
+      el.classList.add('ks-reveal');
+      el.style.transitionDelay=(i%6)*0.04+'s';
+      obs.observe(el);
+    });
+  },100);
+
+  /* ── RIPPLE ON BUTTONS ── */
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('button');
+    if(!btn) return;
+    const r=btn.getBoundingClientRect(),sz=Math.max(r.width,r.height);
+    const rip=document.createElement('span');
+    rip.className='ks-ripple';
+    rip.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px`;
+    btn.appendChild(rip);
+    setTimeout(()=>rip.remove(),560);
+    // click sparks
+    for(let i=0;i<8;i++){
+      const s=document.createElement('div');
+      const a=Math.random()*Math.PI*2,d=20+Math.random()*35;
+      s.style.cssText=`position:fixed;pointer-events:none;z-index:9997;width:4px;height:4px;border-radius:50%;background:var(--accent);left:${e.clientX}px;top:${e.clientY}px;transform:translate(-50%,-50%);transition:all .5s cubic-bezier(.1,.8,.2,1)`;
+      document.body.appendChild(s);
+      requestAnimationFrame(()=>{s.style.transform=`translate(${Math.cos(a)*d-2}px,${Math.sin(a)*d-2}px)`;s.style.opacity='0';s.style.width='2px';s.style.height='2px';});
+      setTimeout(()=>s.remove(),510);
+    }
+  });
+
+  /* ── TILT CARDS ── */
+  document.querySelectorAll('.stat-card,.badge-item,.podium-card,.city-card,.f-card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`translateY(-4px) rotateX(${-y*6}deg) rotateY(${x*6}deg)`;
+      card.style.transformStyle='preserve-3d';
+    });
+    card.addEventListener('mouseleave',()=>{card.style.transform='';});
+  });
+
+  /* ── COUNTER ANIMATION ── */
+  function animateCounter(el,target,suffix){
+    let start=null,orig=el.textContent;
+    const fmt=n=>n.toLocaleString()+suffix;
+    const step=ts=>{
+      if(!start)start=ts;
+      const p=Math.min((ts-start)/1400,1),ease=1-Math.pow(1-p,3);
+      el.textContent=fmt(Math.round(ease*target));
+      if(p<1)requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  const cObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const el=e.target;
+      const raw=el.textContent.replace(/,/g,'');
+      const num=parseFloat(raw);
+      const suffix=raw.replace(/[\d.]/g,'').replace(num.toString().replace(/,/g,''),'');
+      if(!isNaN(num)&&num>10)animateCounter(el,num,suffix);
+      cObs.unobserve(el);
+    });
+  },{threshold:.5});
+  document.querySelectorAll('.stat-card-num,.stat-num,.podium-pts,.lb-pts,.lb-pts-val,.yrb-pts,.pstat-num').forEach(el=>cObs.observe(el));
+
+  /* ── SIDEBAR NAV SLIDE ── */
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('mouseenter',()=>{item.style.paddingLeft='16px';});
+    item.addEventListener('mouseleave',()=>{if(!item.classList.contains('active'))item.style.paddingLeft='';});
+  });
+
+  /* ── INPUT FOCUS LABELS ── */
+  document.querySelectorAll('.form-input').forEach(inp=>{
+    inp.addEventListener('focus',()=>{inp.style.background='var(--surface)';});
+    inp.addEventListener('blur',()=>{inp.style.background='';});
+  });
+
+  /* ── THEME TOGGLE SPIN ── */
+  const tBtn=document.getElementById('themeBtn');
+  if(tBtn){
+    tBtn.addEventListener('click',()=>{
+      tBtn.style.transform='rotate(360deg)';
+      tBtn.style.transition='transform .4s cubic-bezier(.34,1.56,.64,1)';
+      setTimeout(()=>{tBtn.style.transform='';},420);
+    });
+  }
+
+  /* ── STAT CARD ACCENT BAR ── */
+  document.querySelectorAll('.stat-card').forEach(c=>{
+    const bar=document.createElement('div');
+    bar.style.cssText='position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);border-radius:0 0 14px 14px;transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.77,0,.18,1);';
+    c.style.position='relative';c.style.overflow='hidden';
+    c.appendChild(bar);
+    c.addEventListener('mouseenter',()=>{bar.style.transform='scaleX(1)';});
+    c.addEventListener('mouseleave',()=>{bar.style.transform='scaleX(0)';});
+  });
+
+  /* ── BADGE FLOAT ON HOVER ── */
+  document.querySelectorAll('.badge-emoji,.pb,.bw-emoji').forEach(em=>{
+    em.addEventListener('mouseenter',()=>{em.style.animation='ks-float 1s ease-in-out infinite';em.style.display='inline-block';});
+    em.addEventListener('mouseleave',()=>{em.style.animation='';});
+  });
+
+  /* ── AVATAR PULSE ON HOVER ── */
+  document.querySelectorAll('.user-av,.lb-av,.ngo-av,.match-av,.podium-av,.yrb-av').forEach(av=>{
+    av.addEventListener('mouseenter',()=>{av.style.animation='ks-pulse-ring 1s ease-out infinite';});
+    av.addEventListener('mouseleave',()=>{av.style.animation='';});
+  });
+
+  /* ── EMERGENCY BANNER ATTENTION SHAKE ── */
+  const em=document.getElementById('emergencyBanner');
+  if(em&&!em.classList.contains('hidden')){
+    const shakeStyle=document.createElement('style');
+    shakeStyle.textContent='@keyframes ks-shake{0%,100%{transform:none}10%,30%,50%,70%,90%{transform:translateX(-4px)}20%,40%,60%,80%{transform:translateX(4px)}}';
+    document.head.appendChild(shakeStyle);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},1200);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},5000);
+  }
+
+  /* ── LB ROW HOVER RANK HIGHLIGHT ── */
+  document.querySelectorAll('.lb-row:not(.header):not(.you)').forEach(row=>{
+    row.addEventListener('mouseenter',()=>{row.style.background='var(--surface2)';row.style.paddingLeft='28px';row.style.transition='all .2s';});
+    row.addEventListener('mouseleave',()=>{row.style.background='';row.style.paddingLeft='';});
+  });
+
+  /* ── PODIUM CROWN FLOAT ── */
+  document.querySelectorAll('.podium-crown').forEach(c=>{
+    c.style.display='inline-block';c.style.animation='ks-float 2.5s ease-in-out infinite';
+    c.style.animationDelay=Math.random()*.8+'s';
+  });
+
+  /* ── BLINK DOT PULSE ── */
+  document.querySelectorAll('.em-dot,.badge-dot,.ai-dot,.tag-dot').forEach(dot=>{
+    dot.style.boxShadow='0 0 0 0 rgba(0,200,150,.4)';
+    dot.style.animation='blink 2s infinite, ks-pulse-ring 2s ease-out infinite';
+  });
+
+  /* ── TASK CARD URGENCY PULSE ── */
+  document.querySelectorAll('.task-status.urgent,.urgency.high').forEach(el=>{
+    el.style.animation='ks-shimmer 1.6s ease-in-out infinite';
+  });
+
+  /* ── PAGE ENTRY FADE ── */
+  document.body.style.opacity='0';
+  document.body.style.transition='opacity .4s ease';
+  window.addEventListener('load',()=>{document.body.style.opacity='1';});
+
+  /* ── SMOOTH LINK TRANSITIONS ── */
+  document.querySelectorAll('[onclick*="location.href"],[onclick*="window.location"]').forEach(el=>{
+    el.addEventListener('click',e=>{
+      e.preventDefault();
+      const match=el.getAttribute('onclick').match(/href='([^']+)'/);
+      if(match){
+        document.body.style.opacity='0';
+        setTimeout(()=>{window.location.href=match[1];},300);
+      }
+    });
+  });
+
+})();
+</script>
+
+<style>
+/* dashboard specific */
+.stat-card-num{transition:color .3s;}
+.stat-card:hover .stat-card-num{color:var(--text);}
+/* task item hover slide */
+.task-item{transition:all .22s ease;padding-left:0;}
+.task-item:hover{padding-left:8px;border-left:3px solid var(--accent);}
+/* activity icon float */
+.act-icon{transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+.activity-item:hover .act-icon{transform:scale(1.2) rotate(-5deg);}
+/* sidebar glow on active */
+.nav-item.active{box-shadow:inset 3px 0 0 var(--accent);}
+/* badge unlock shimmer */
+.badge-item:not(.locked){animation:ks-popIn .5s both;}
+.badge-item:nth-child(1){animation-delay:.05s}
+.badge-item:nth-child(2){animation-delay:.10s}
+.badge-item:nth-child(3){animation-delay:.15s}
+/* emergency banner pulse border */
+.emergency-banner:not(.hidden){animation:emergencyPulse 2s ease-in-out infinite;}
+@keyframes emergencyPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+/* availability wrap pulse when on */
+.avail-wrap{transition:border-color .3s;}
+/* lb row your highlight */
+.lb-row[style*="accent-dim"]{animation:ks-popIn .6s .3s both;}
+</style>
+<script>
+/* dashboard extra */
+(function(){
+  /* mini leaderboard row stagger */
+  document.querySelectorAll('.lb-row').forEach((r,i)=>{
+    r.style.opacity='0';r.style.transform='translateX(-10px)';
+    r.style.transition=`opacity .4s ${i*.07}s ease, transform .4s ${i*.07}s ease`;
+    setTimeout(()=>{r.style.opacity='1';r.style.transform='none';},200+i*70);
+  });
+  /* task pts wiggle on hover */
+  document.querySelectorAll('.task-pts').forEach(el=>{
+    el.closest('.task-item')?.addEventListener('mouseenter',()=>{
+      el.style.transform='scale(1.2)';el.style.transition='transform .2s cubic-bezier(.34,1.56,.64,1)';
+    });
+    el.closest('.task-item')?.addEventListener('mouseleave',()=>{el.style.transform='';});
+  });
+  /* stat card click ripple already handled globally */
+})();
+</script>
+</body>
+</html>
+
+
+
+

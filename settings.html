@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KarSeva — Settings</title>
+  <script>(function(){const t=localStorage.getItem('ksTheme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+    [data-theme="dark"]{
+      --bg:#0A0F0D;--surface:#111714;--surface2:#182018;--border:#1E2B22;
+      --accent:#00C896;--accent-dim:rgba(0,200,150,.12);--accent-border:rgba(0,200,150,.28);
+      --text:#F0FFF8;--muted:#7A9E8A;--danger:#EF4444;--danger-dim:rgba(239,68,68,.1);
+      --nav-bg:rgba(10,15,13,.9);
+    }
+    [data-theme="light"]{
+      --bg:#F2FCF7;--surface:#FFFFFF;--surface2:#E8F5EE;--border:#C8E6D6;
+      --accent:#009E72;--accent-dim:rgba(0,158,114,.10);--accent-border:rgba(0,158,114,.32);
+      --text:#071A0F;--muted:#3D7A58;--danger:#DC2626;--danger-dim:rgba(220,38,38,.08);
+      --nav-bg:rgba(242,252,247,.92);
+    }
+
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;transition:background .35s,color .35s;}
+    a{text-decoration:none;color:inherit;}
+
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;z-index:100;transition:background .35s,border-color .35s;}
+    .sidebar-logo{font-size:20px;font-weight:800;letter-spacing:-.02em;padding:0 12px;margin-bottom:32px;}
+    .sidebar-logo span{color:var(--accent);}
+    .nav-section-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 12px;margin-bottom:8px;margin-top:20px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .2s,color .2s;margin-bottom:2px;}
+    .nav-item:hover{background:var(--surface2);color:var(--text);}
+    .nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:700;}
+    .nav-icon{font-size:17px;width:20px;text-align:center;}
+    .sidebar-bottom{margin-top:auto;}
+    .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:border-color .2s;}
+    .user-card:hover{border-color:var(--accent);}
+    .user-av{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .user-name{font-size:13px;font-weight:700;line-height:1.2;}
+    .user-role{font-size:11px;color:var(--muted);}
+
+    .main{margin-left:240px;padding:32px;min-height:100vh;}
+
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+    .topbar h1{font-size:22px;font-weight:800;letter-spacing:-.01em;}
+    .topbar p{font-size:14px;color:var(--muted);margin-top:2px;}
+    .theme-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .4s cubic-bezier(.34,1.56,.64,1);}
+    .theme-toggle:hover{border-color:var(--accent);}
+
+    .section-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;transition:background .35s,border-color .35s;}
+    .section-card:last-child{margin-bottom:0;}
+    .sc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .sc-title{font-size:16px;font-weight:800;}
+
+    .info-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+    .info-row:last-child{border-bottom:none;padding-bottom:0;}
+    .info-label{font-size:13px;font-weight:600;color:var(--muted);}
+    .info-value{font-size:14px;font-weight:700;color:var(--text);}
+    .role-pill{display:inline-block;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);font-size:12px;font-weight:700;padding:3px 12px;border-radius:99px;text-transform:capitalize;}
+
+    .btn-signout{width:100%;padding:13px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:border-color .2s,color .2s,background .2s;}
+    .btn-signout:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-dim);}
+
+    .theme-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;}
+    .theme-label{font-size:14px;font-weight:600;}
+    .theme-desc{font-size:12px;color:var(--muted);margin-top:2px;}
+    .btn-theme-toggle{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:border-color .2s,background .2s;}
+    .btn-theme-toggle:hover{border-color:var(--accent);background:var(--accent-dim);}
+
+    @media(max-width:900px){
+      .sidebar{display:none;}
+      .main{margin-left:0;padding:20px;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">Kar<span>Seva</span></div>
+
+  <div class="nav-section-label">Main</div>
+  <div class="nav-item" onclick="location.href='dashboard.html'"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="location.href='tasks.html'"><span class="nav-icon">✅</span> My Tasks</div>
+  <div class="nav-item" onclick="location.href='community.html'"><span class="nav-icon">👥</span> Community</div>
+  <div class="nav-item" onclick="location.href='leaderboard.html'"><span class="nav-icon">🏅</span> Leaderboard</div>
+  <div class="nav-item" onclick="location.href='donate.html'"><span class="nav-icon">❤️</span> Donate</div>
+  <div class="nav-item" id="adminNav" style="display:none;" onclick="location.href='admin.html'"><span class="nav-icon">🧠</span> Admin Panel</div>
+
+  <div class="nav-section-label">Account</div>
+  <div class="nav-item" onclick="location.href='PROFILE.html'"><span class="nav-icon">👤</span> My Profile</div>
+  <div class="nav-item active"><span class="nav-icon">⚙️</span> Settings</div>
+  <div class="nav-item" id="myNgoTab" style="display:none;" onclick="location.href='ngoprofile.html'">
+  <span class="nav-icon">🏛️</span> My NGO
+</div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-av" id="sidebarAv">--</div>
+      <div>
+        <div class="user-name" id="sidebarName">Loading...</div>
+        <div class="user-role" id="sidebarRole">Volunteer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="topbar">
+    <div>
+      <h1>⚙️ Settings</h1>
+      <p>Manage your account and preferences</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn">🌙</button>
+  </div>
+
+  <!-- ACCOUNT INFO -->
+  <div class="section-card">
+    <div class="sc-header">
+      <div class="sc-title">Account</div>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Name</span>
+      <span class="info-value" id="infoName">—</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Email</span>
+      <span class="info-value" id="infoEmail">—</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Role</span>
+      <span class="info-value"><span class="role-pill" id="infoRole">—</span></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">City</span>
+      <span class="info-value" id="infoCity">—</span>
+    </div>
+  </div>
+
+  <!-- APPEARANCE -->
+  <div class="section-card">
+    <div class="sc-header">
+      <div class="sc-title">Appearance</div>
+    </div>
+    <div class="theme-row">
+      <div>
+        <div class="theme-label">Theme</div>
+        <div class="theme-desc">Switch between dark and light mode</div>
+      </div>
+      <button class="btn-theme-toggle" id="themeSwitchBtn">🌙 Dark</button>
+    </div>
+  </div>
+
+  <!-- SIGN OUT -->
+  <div class="section-card">
+    <button class="btn-signout" id="signOutBtn">Sign Out</button>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBM1zpNgjrztamRcvRJlJZxZhUrHqx6xTo",
+    authDomain: "karseva-1fb4f.firebaseapp.com",
+    projectId: "karseva-1fb4f",
+    storageBucket: "karseva-1fb4f.firebasestorage.app",
+    messagingSenderId: "4741841467",
+    appId: "1:4741841467:web:780939d385e60af936521e"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  /* ── THEME ── */
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('ksTheme', theme);
+    const isDark = theme === 'dark';
+    document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+    document.getElementById('themeSwitchBtn').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+  }
+
+  const savedTheme = localStorage.getItem('ksTheme') || 'dark';
+  applyTheme(savedTheme);
+
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    applyTheme(isDark ? 'light' : 'dark');
+  });
+
+  document.getElementById('themeSwitchBtn').addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    applyTheme(isDark ? 'light' : 'dark');
+  });
+
+  /* ── AUTH ── */
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'auth.html'; return; }
+
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const data = snap.exists() ? snap.data() : {};
+
+    const firstName = data.firstName || user.displayName?.split(' ')[0] || 'User';
+    const lastName  = data.lastName  || '';
+    const fullName  = `${firstName} ${lastName}`.trim();
+    const initials  = (firstName[0] + (lastName[0] || '')).toUpperCase();
+
+    document.getElementById('infoName').textContent  = fullName;
+    document.getElementById('infoEmail').textContent = user.email || '—';
+    document.getElementById('infoRole').textContent  = data.role  || 'volunteer';
+    document.getElementById('infoCity').textContent  = data.city  || '—';
+    document.getElementById('sidebarAv').textContent   = initials;
+    document.getElementById('sidebarName').textContent = fullName;
+    document.getElementById('sidebarRole').textContent = data.role === 'ngo' ? 'NGO Admin' : 'Volunteer';
+
+    if (data.role === 'ngo') document.getElementById('adminNav').style.display = 'flex';
+    const ngoTab = document.getElementById('myNgoTab');
+    if (ngoTab) ngoTab.style.display = data.role === 'ngo' ? 'flex' : 'none';
+  });
+
+  /* ── SIGN OUT ── */
+  document.getElementById('signOutBtn').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = 'auth.html';
+  });
+</script>
+</body>
+</html>

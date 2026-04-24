@@ -1,0 +1,756 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <script>
+  (function(){
+    const t = localStorage.getItem('ksTheme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KarSeva — Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+    [data-theme="dark"]{
+      --bg:#0A0F0D;--surface:#111714;--surface2:#182018;--border:#1E2B22;
+      --accent:#00C896;--accent-dim:rgba(0,200,150,.12);--accent-border:rgba(0,200,150,.28);
+      --text:#F0FFF8;--muted:#7A9E8A;--danger:#EF4444;--danger-dim:rgba(239,68,68,.1);
+      --warning:#F5A623;--warning-dim:rgba(245,166,35,.12);
+      --gold:#F5A623;--silver:#A8B8C8;--bronze:#CD7F32;
+    }
+    [data-theme="light"]{
+      --bg:#F2FCF7;--surface:#FFFFFF;--surface2:#E8F5EE;--border:#C8E6D6;
+      --accent:#009E72;--accent-dim:rgba(0,158,114,.10);--accent-border:rgba(0,158,114,.32);
+      --text:#071A0F;--muted:#3D7A58;--danger:#DC2626;--danger-dim:rgba(220,38,38,.08);
+      --warning:#D97706;--warning-dim:rgba(217,119,6,.1);
+      --gold:#D97706;--silver:#6B7280;--bronze:#92400E;
+    }
+
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;transition:background .35s,color .35s;}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;z-index:100;transition:background .35s;}
+    .sidebar-logo{font-size:20px;font-weight:800;letter-spacing:-.02em;padding:0 12px;margin-bottom:32px;}
+    .sidebar-logo span{color:var(--accent);}
+    .nav-section-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 12px;margin-bottom:8px;margin-top:20px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .2s,color .2s;margin-bottom:2px;}
+    .nav-item:hover{background:var(--surface2);color:var(--text);}
+    .nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:700;}
+    .nav-icon{font-size:17px;width:20px;text-align:center;}
+    .sidebar-bottom{margin-top:auto;}
+    .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);}
+    .user-av{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .user-name{font-size:13px;font-weight:700;}
+    .user-role{font-size:11px;color:var(--muted);}
+
+    /* MAIN */
+    .main{margin-left:240px;padding:32px;min-height:100vh;padding-bottom:120px;}
+
+    /* TOPBAR */
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+    .topbar h1{font-size:22px;font-weight:800;letter-spacing:-.01em;}
+    .topbar p{font-size:14px;color:var(--muted);margin-top:2px;}
+    .theme-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+    .theme-toggle:hover{border-color:var(--accent);}
+
+    /* FILTER TABS */
+    .filter-tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;width:fit-content;margin-bottom:32px;}
+    .filter-tab{padding:8px 18px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:background .2s,color .2s;white-space:nowrap;}
+    .filter-tab.active{background:var(--accent);color:#0A0F0D;}
+
+    /* PODIUM */
+    .podium-wrap{display:flex;align-items:flex-end;justify-content:center;gap:16px;margin-bottom:40px;padding:0 20px;}
+
+    .podium-card{display:flex;flex-direction:column;align-items:center;border-radius:16px;padding:20px 16px;border:1px solid var(--border);transition:border-color .2s,background .35s;flex:1;max-width:220px;}
+    .podium-card:hover{border-color:var(--accent);}
+    .podium-card.p1{background:rgba(245,166,35,.06);border-color:rgba(245,166,35,.3);order:2;padding-top:32px;}
+    .podium-card.p2{background:rgba(168,184,200,.04);border-color:rgba(168,184,200,.2);order:1;}
+    .podium-card.p3{background:rgba(205,127,50,.04);border-color:rgba(205,127,50,.2);order:3;}
+
+    .podium-crown{font-size:28px;margin-bottom:8px;}
+    .podium-av{width:60px;height:60px;border-radius:16px;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative;}
+    .podium-av.gold{background:#F5A623;color:#0A0F0D;}
+    .podium-av.silver{background:#A8B8C8;color:#0A0F0D;}
+    .podium-av.bronze{background:#CD7F32;color:#0A0F0D;}
+    .podium-rank{position:absolute;bottom:-8px;right:-8px;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);}
+    .podium-rank.gold{background:#F5A623;color:#0A0F0D;}
+    .podium-rank.silver{background:#A8B8C8;color:#0A0F0D;}
+    .podium-rank.bronze{background:#CD7F32;color:#0A0F0D;}
+    .podium-name{font-size:15px;font-weight:800;margin-bottom:2px;text-align:center;}
+    .podium-city{font-size:12px;color:var(--muted);margin-bottom:10px;}
+    .podium-pts{font-size:22px;font-weight:800;margin-bottom:4px;}
+    .podium-pts.gold{color:#F5A623;}
+    .podium-pts.silver{color:#A8B8C8;}
+    .podium-pts.bronze{color:#CD7F32;}
+    .podium-tasks{font-size:12px;color:var(--muted);}
+    .podium-badges{display:flex;gap:4px;margin-top:10px;flex-wrap:wrap;justify-content:center;}
+    .pb{font-size:16px;}
+
+    /* LEADERBOARD TABLE */
+    .lb-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;transition:background .35s;}
+    .lb-table-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);}
+    .lb-table-title{font-size:16px;font-weight:800;}
+    .lb-search{padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none;width:200px;}
+    .lb-search:focus{border-color:var(--accent);}
+
+    .lb-row{display:grid;grid-template-columns:48px 1fr 100px 90px 80px 70px;align-items:center;padding:14px 24px;border-bottom:1px solid var(--border);transition:background .15s;}
+    .lb-row:last-child{border-bottom:none;}
+    .lb-row:hover{background:var(--surface2);}
+    .lb-row.you{background:var(--accent-dim);}
+    .lb-row.header{background:var(--surface2);padding:10px 24px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+
+    .lb-rank-num{font-size:15px;font-weight:800;color:var(--muted);}
+    .lb-rank-num.r1{color:#F5A623;}
+    .lb-rank-num.r2{color:#A8B8C8;}
+    .lb-rank-num.r3{color:#CD7F32;}
+
+    .lb-volunteer{display:flex;align-items:center;gap:12px;}
+    .lb-av{width:36px;height:36px;border-radius:9px;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .lb-vname{font-size:14px;font-weight:700;}
+    .lb-vcity{font-size:12px;color:var(--muted);}
+    .lb-you-badge{font-size:10px;font-weight:700;background:var(--accent);color:#0A0F0D;padding:2px 7px;border-radius:99px;margin-left:6px;}
+
+    .lb-pts-val{font-size:15px;font-weight:800;color:var(--accent);}
+    .lb-tasks-val{font-size:14px;color:var(--muted);}
+    .lb-badges-val{font-size:14px;color:var(--muted);}
+    .lb-city-val{font-size:13px;color:var(--muted);}
+
+    /* BADGES WALL */
+    .badges-wall{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;transition:background .35s;}
+    .bw-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .bw-title{font-size:16px;font-weight:800;}
+    .bw-grid{display:flex;flex-wrap:wrap;gap:10px;}
+    .bw-item{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 14px;transition:border-color .2s;}
+    .bw-item:hover{border-color:var(--accent);}
+    .bw-emoji{font-size:18px;}
+    .bw-name{font-size:12px;font-weight:700;}
+    .bw-who{font-size:11px;color:var(--muted);}
+
+    /* YOUR RANK — fixed bottom bar */
+    .your-rank-bar{
+      position:fixed;bottom:0;left:240px;right:0;
+      background:var(--surface);border-top:1px solid var(--border);
+      padding:14px 32px;
+      display:flex;align-items:center;gap:20px;
+      z-index:50;transition:background .35s;
+    }
+    .yrb-label{font-size:13px;color:var(--muted);font-weight:600;}
+    .yrb-rank{font-size:22px;font-weight:800;color:var(--accent);}
+    .yrb-div{width:1px;height:32px;background:var(--border);}
+    .yrb-pts{font-size:18px;font-weight:800;}
+    .yrb-next{font-size:13px;color:var(--muted);}
+    .yrb-progress-wrap{flex:1;max-width:300px;}
+    .yrb-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;}
+    .yrb-progress{height:6px;border-radius:99px;background:var(--border);overflow:hidden;}
+    .yrb-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .6s ease;}
+    .yrb-av{width:38px;height:38px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+    @media(max-width:900px){
+      .sidebar{display:none;}
+      .main{margin-left:0;padding:20px;padding-bottom:120px;}
+      .your-rank-bar{left:0;}
+      .podium-wrap{flex-direction:column;align-items:center;}
+      .podium-card{max-width:100%;width:100%;order:unset!important;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">Kar<span>Seva</span></div>
+  <div class="nav-section-label">Main</div>
+  <div class="nav-item" onclick="location.href='dashboard.html'"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="location.href='tasks.html'"><span class="nav-icon">✅</span> Tasks</div>
+  <div class="nav-item" onclick="location.href='community.html'"><span class="nav-icon">👥</span> Community</div>
+  <div class="nav-item active"><span class="nav-icon">🏅</span> Leaderboard</div>
+  <div class="nav-item" onclick="location.href='donate.html'"><span class="nav-icon">❤️</span> Donate</div>
+  <div class="nav-item" id="adminNav" style="display:none;" onclick="location.href='admin.html'"><span class="nav-icon">🧠</span> Admin Panel</div>
+  <div class="nav-section-label">Account</div>
+  <div class="nav-item" onclick="location.href='PROFILE.html'"><span class="nav-icon">👤</span> My Profile</div>
+  <div class="nav-item" onclick="location.href='settings.html'"><span class="nav-icon">⚙️</span> Settings</div>
+  <div class="nav-item" id="myNgoTab" style="display:none;" onclick="location.href='ngoprofile.html'">
+  <span class="nav-icon">🏛️</span> My NGO
+</div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-av" id="sidebarAv">--</div>
+      <div>
+        <div class="user-name" id="sidebarName">Loading...</div>
+        <div class="user-role" id="sidebarRole">Volunteer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>🏅 Leaderboard</h1>
+      <p id="lbSub">Top volunteers across India</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn">🌙</button>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="setFilter(this,'all')">🌍 All India</button>
+    <button class="filter-tab" onclick="setFilter(this,'city')">📍 My City</button>
+    <button class="filter-tab" onclick="setFilter(this,'week')">📅 This Week</button>
+    <button class="filter-tab" onclick="setFilter(this,'alltime')">🏆 All Time</button>
+  </div>
+
+  <!-- PODIUM -->
+  <div class="podium-wrap" id="podiumWrap">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- BADGES WALL -->
+  <div class="badges-wall">
+    <div class="bw-header">
+      <div class="bw-title">🎖️ Recently Earned Badges</div>
+    </div>
+    <div class="bw-grid" id="badgesWall">
+      <div class="bw-item"><div class="bw-emoji">🚀</div><div><div class="bw-name">First Step</div><div class="bw-who">Ravi Kumar · 2h ago</div></div></div>
+      <div class="bw-item"><div class="bw-emoji">🏅</div><div><div class="bw-name">First Responder</div><div class="bw-who">Priya Sharma · 4h ago</div></div></div>
+      <div class="bw-item"><div class="bw-emoji">⭐</div><div><div class="bw-name">Star Volunteer</div><div class="bw-who">Sneha Patel · Yesterday</div></div></div>
+      <div class="bw-item"><div class="bw-emoji">🔥</div><div><div class="bw-name">On Fire</div><div class="bw-who">Meera Joshi · Yesterday</div></div></div>
+      <div class="bw-item"><div class="bw-emoji">💎</div><div><div class="bw-name">Diamond</div><div class="bw-who">Neha Kapoor · 2d ago</div></div></div>
+      <div class="bw-item"><div class="bw-emoji">🌱</div><div><div class="bw-name">Green Hero</div><div class="bw-who">Arjun Mehta · 2d ago</div></div></div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD TABLE -->
+  <div class="lb-table-wrap">
+    <div class="lb-table-header">
+      <div class="lb-table-title" id="tableTitle">All India Rankings</div>
+      <input class="lb-search" type="text" placeholder="Search volunteer..." oninput="searchVols(this.value)"/>
+    </div>
+    <div class="lb-row header">
+      <div>Rank</div>
+      <div>Volunteer</div>
+      <div>Points</div>
+      <div>Tasks</div>
+      <div>Badges</div>
+      <div>City</div>
+    </div>
+    <div id="lbRows">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+</div>
+
+<!-- YOUR RANK BAR -->
+<div class="your-rank-bar" id="yourRankBar">
+  <div class="yrb-av" id="yrbAv">--</div>
+  <div>
+    <div class="yrb-label">Your Rank</div>
+    <div class="yrb-rank" id="yrbRank">#--</div>
+  </div>
+  <div class="yrb-div"></div>
+  <div>
+    <div class="yrb-label">Your Points</div>
+    <div class="yrb-pts" id="yrbPts">0 pts</div>
+  </div>
+  <div class="yrb-div"></div>
+  <div class="yrb-progress-wrap">
+    <div class="yrb-progress-label">
+      <span id="yrbNextLabel">Next rank</span>
+      <span id="yrbNextPts"></span>
+    </div>
+    <div class="yrb-progress"><div class="yrb-fill" id="yrbFill" style="width:0%"></div></div>
+  </div>
+  <div style="font-size:13px;color:var(--muted);" id="yrbMsg"></div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBM1zpNgjrztamRcvRJlJZxZhUrHqx6xTo",
+    authDomain: "karseva-1fb4f.firebaseapp.com",
+    projectId: "karseva-1fb4f",
+    storageBucket: "karseva-1fb4f.firebasestorage.app",
+    messagingSenderId: "4741841467",
+    appId: "1:4741841467:web:780939d385e60af936521e"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  const DEMO = [
+    { id:'v0', firstName:'Neha',   lastName:'Kapoor', city:'Delhi',   points:2840, tasksCompleted:18, badges:['💎','👑','🔥','⭐','🏅','🚀'], role:'volunteer' },
+    { id:'v1', firstName:'Ravi',   lastName:'Kumar',  city:'Indore',  points:2210, tasksCompleted:14, badges:['🔥','⭐','🏅','🚀'], role:'volunteer' },
+    { id:'v2', firstName:'Priya',  lastName:'Sharma', city:'Bhopal',  points:1980, tasksCompleted:12, badges:['⭐','🏅','🚀'], role:'volunteer' },
+    { id:'v3', firstName:'Sneha',  lastName:'Patel',  city:'Pune',    points:1640, tasksCompleted:10, badges:['⭐','🏅','🚀'], role:'volunteer' },
+    { id:'v4', firstName:'Meera',  lastName:'Joshi',  city:'Pune',    points:1340, tasksCompleted:8,  badges:['🏅','🚀'], role:'volunteer' },
+    { id:'v5', firstName:'Arjun',  lastName:'Mehta',  city:'Indore',  points:980,  tasksCompleted:6,  badges:['🌱','🚀'], role:'volunteer' },
+    { id:'v6', firstName:'Ananya', lastName:'Singh',  city:'Mumbai',  points:760,  tasksCompleted:5,  badges:['🚀'], role:'volunteer' },
+    { id:'v7', firstName:'Rahul',  lastName:'Verma',  city:'Bhopal',  points:420,  tasksCompleted:3,  badges:['🚀'], role:'volunteer' },
+    { id:'v8', firstName:'Vikram', lastName:'Das',    city:'Indore',  points:190,  tasksCompleted:2,  badges:[], role:'volunteer' },
+  ];
+
+  const AV_COLORS = ['#00C896','#7C5CFF','#F5A623','#E65C00','#00A8E8','#EC4899','#8B5CF6','#06B6D4','#84CC16'];
+
+  let allVols = [];
+  let currentUid = null;
+  let currentCity = '';
+  let currentFilter = 'all';
+  let currentProfile = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'auth.html'; return; }
+    currentUid = user.uid;
+
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    currentProfile = snap.exists() ? snap.data() : {};
+    const p = currentProfile;
+    currentCity = p.city || '';
+
+    const initials = ((p.firstName||'U')[0]+(p.lastName||'')[0]).toUpperCase();
+    document.getElementById('sidebarAv').textContent   = initials;
+    document.getElementById('sidebarName').textContent = `${p.firstName||''} ${p.lastName||''}`.trim();
+    document.getElementById('sidebarRole').textContent = p.role === 'ngo' ? 'NGO Admin' : 'Volunteer';
+    document.getElementById('yrbAv').textContent       = initials;
+    if (p.role === 'ngo') document.getElementById('adminNav').style.display = 'flex';
+    const ngoTab = document.getElementById('myNgoTab');
+    if (ngoTab) ngoTab.style.display = p.role === 'ngo' ? 'flex' : 'none';
+
+    loadVols();
+  });
+
+  // WITH THIS:
+function loadVols() {
+    onSnapshot(collection(db, 'users'), (snap) => {
+      const fromDB = [];
+      snap.forEach(d => {
+  const v = d.data();
+  if (v.role === 'volunteer') {
+    fromDB.push({ id: d.id, ...v });
+  }
+});
+
+      if (fromDB.length > 0) {
+        allVols = fromDB;
+      } else {
+        allVols = DEMO;
+      }
+
+      // inject current user if not present
+      if (currentProfile && !allVols.find(v => v.id === currentUid)) {
+        allVols.push({ id: currentUid, ...currentProfile });
+      }
+
+      allVols.sort((a, b) => (b.points || 0) - (a.points || 0));
+      renderAll();
+    }, (e) => {
+      console.error('Leaderboard snapshot error:', e);
+      allVols = DEMO;
+      allVols.sort((a, b) => (b.points || 0) - (a.points || 0));
+      renderAll();
+    });
+  }
+
+  function getFilteredVols() {
+    let vols = [...allVols];
+    if (currentFilter === 'city') vols = vols.filter(v => v.city?.toLowerCase() === currentCity.toLowerCase());
+    // week/alltime same for now (would need timestamps in production)
+    return vols;
+  }
+
+  function renderAll() {
+    const vols = getFilteredVols();
+    renderPodium(vols);
+    renderRows(vols);
+    renderMyRank(vols);
+    document.getElementById('lbSub').textContent = `${vols.length} volunteers ranked`;
+  }
+
+  function renderPodium(vols) {
+    const top3 = vols.slice(0, 3);
+    const podiumOrder = [top3[1], top3[0], top3[2]].filter(Boolean);
+    const classes  = ['p2','p1','p3'];
+    const crowns   = ['🥈','🥇','🥉'];
+    const avClass  = ['silver','gold','bronze'];
+    const ptsClass = ['silver','gold','bronze'];
+    const rankNums = ['2','1','3'];
+    const emojiBadgesSets = [['⭐','🏅','🚀'],['💎','👑','🔥','⭐','🏅','🚀'],['🏅','🚀']];
+
+    document.getElementById('podiumWrap').innerHTML = podiumOrder.map((v, i) => {
+      const initials = ((v.firstName||'U')[0]+(v.lastName||'')[0]).toUpperCase();
+      const isYou = v.id === currentUid;
+      const badges = (v.badges||[]).slice(0,4);
+      return `
+      <div class="podium-card ${classes[i]}">
+        <div class="podium-crown">${crowns[i]}</div>
+        <div class="podium-av ${avClass[i]}">
+          ${initials}
+          <div class="podium-rank ${avClass[i]}">${rankNums[i]}</div>
+        </div>
+        <div class="podium-name">${v.firstName} ${v.lastName||''} ${isYou?'<span style="font-size:11px;background:var(--accent);color:#0A0F0D;padding:2px 7px;border-radius:99px;">You</span>':''}</div>
+        <div class="podium-city">📍 ${v.city||'India'}</div>
+        <div class="podium-pts ${ptsClass[i]}">${(v.points||0).toLocaleString()}</div>
+        <div class="podium-tasks">${v.tasksCompleted||0} tasks completed</div>
+        <div class="podium-badges">${badges.map(b=>`<span class="pb">${b}</span>`).join('')}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderRows(vols) {
+    const rankClass = (i) => i===0?'r1':i===1?'r2':i===2?'r3':'';
+    document.getElementById('lbRows').innerHTML = vols.map((v, i) => {
+      const initials = ((v.firstName||'U')[0]+(v.lastName||'')[0]).toUpperCase();
+      const color    = AV_COLORS[i % AV_COLORS.length];
+      const isYou    = v.id === currentUid;
+      const badges   = (v.badges||[]).slice(0,3).join('') || '—';
+      return `
+      <div class="lb-row ${isYou?'you':''}">
+        <div class="lb-rank-num ${rankClass(i)}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+        <div class="lb-volunteer">
+          <div class="lb-av" style="background:${color};color:#0A0F0D;">${initials}</div>
+          <div>
+            <div class="lb-vname">${v.firstName} ${v.lastName||''} ${isYou?'<span class="lb-you-badge">You</span>':''}</div>
+            <div class="lb-vcity">📍 ${v.city||'India'}</div>
+          </div>
+        </div>
+        <div class="lb-pts-val">${(v.points||0).toLocaleString()}</div>
+        <div class="lb-tasks-val">${v.tasksCompleted||0}</div>
+        <div class="lb-badges-val">${badges}</div>
+        <div class="lb-city-val">${v.city||'—'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderMyRank(vols) {
+    const idx   = vols.findIndex(v => v.id === currentUid);
+    const myPts = currentProfile?.points || 0;
+
+    if (idx === -1) {
+      document.getElementById('yrbRank').textContent = '#--';
+      document.getElementById('yrbPts').textContent  = `${myPts} pts`;
+      return;
+    }
+
+    const rank    = idx + 1;
+    const nextVol = idx > 0 ? vols[idx - 1] : null;
+    const nextPts = nextVol ? (nextVol.points||0) : myPts;
+    const prevPts = idx < vols.length - 1 ? (vols[idx+1]?.points||0) : 0;
+    const range   = nextPts - prevPts;
+    const progress = range > 0 ? Math.min(100, Math.round(((myPts - prevPts) / range) * 100)) : 100;
+    const gap = nextPts - myPts;
+
+    document.getElementById('yrbRank').textContent    = `#${rank}`;
+    document.getElementById('yrbPts').textContent     = `${myPts.toLocaleString()} pts`;
+    document.getElementById('yrbFill').style.width    = `${progress}%`;
+    document.getElementById('yrbNextPts').textContent = nextVol ? `${nextPts.toLocaleString()} pts` : 'Top!';
+    document.getElementById('yrbNextLabel').textContent = nextVol ? `To #${rank-1}` : 'You\'re #1!';
+    document.getElementById('yrbMsg').textContent     = nextVol ? `${gap.toLocaleString()} pts to next rank` : '🏆 You\'re at the top!';
+  }
+
+  window.setFilter = (el, filter) => {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    currentFilter = filter;
+    const titles = { all:'All India Rankings', city:`${currentCity || 'My City'} Rankings`, week:'This Week\'s Rankings', alltime:'All Time Rankings' };
+    document.getElementById('tableTitle').textContent = titles[filter];
+    renderAll();
+  };
+
+  window.searchVols = (q) => {
+    const filtered = getFilteredVols().filter(v =>
+      `${v.firstName} ${v.lastName} ${v.city}`.toLowerCase().includes(q.toLowerCase())
+    );
+    renderRows(filtered);
+  };
+
+  document.getElementById('themeBtn').addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = dark ? 'light' : 'dark';
+
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+
+  localStorage.setItem('ksTheme', next);
+});
+</script>
+
+<script>
+/* ── KARSEVA MAGIC DYNAMICS ── */
+(function(){
+  /* ── SCROLL REVEAL ── */
+  const style=document.createElement('style');
+  style.textContent=`
+    .ks-reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal.ks-in{opacity:1;transform:none;}
+    .ks-reveal-l{opacity:0;transform:translateX(-30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-l.ks-in{opacity:1;transform:none;}
+    .ks-reveal-r{opacity:0;transform:translateX(30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-r.ks-in{opacity:1;transform:none;}
+    @keyframes ks-shimmer{0%,100%{opacity:.55}50%{opacity:1}}
+    @keyframes ks-popIn{0%{opacity:0;transform:scale(.85) translateY(16px)}100%{opacity:1;transform:none}}
+    @keyframes ks-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes ks-pulse-ring{0%{box-shadow:0 0 0 0 rgba(0,200,150,.4)}70%{box-shadow:0 0 0 10px rgba(0,200,150,0)}100%{box-shadow:0 0 0 0 rgba(0,200,150,0)}}
+    @keyframes ks-spin{to{transform:rotate(360deg)}}
+    .ks-float{animation:ks-float 3.5s ease-in-out infinite;}
+    .ks-pulse{animation:ks-pulse-ring 2s ease-out infinite;}
+    .ks-pop{animation:ks-popIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+    /* card hover lift */
+    .stat-card,.section-card,.f-card,.task-card,.ngo-card,.badge-item,.lb-table-wrap,.bw-item,.podium-card,.city-card,.tov-card,.auth-box,.form-card,.ai-panel,.post-card,.community-card,.donate-card{transition-property:transform,border-color,box-shadow,background!important;transition-duration:.28s!important;}
+    .stat-card:hover,.section-card:hover,.task-card:hover,.ngo-card:hover,.badge-item:hover,.bw-item:hover,.podium-card:hover,.city-card:hover,.tov-card:hover,.community-card:hover,.donate-card:hover{transform:translateY(-4px)!important;box-shadow:0 12px 32px rgba(0,200,150,.1)!important;}
+    .badge-item:hover .badge-emoji{display:inline-block;animation:ks-float 1.2s ease-in-out infinite;}
+    /* button shimmer */
+    .btn-submit,.btn-hero,.btn-post,.btn-cta1,.btn-match,.match-assign-btn,.btn-dashboard,.em-btn,.ai-rec-action{position:relative;overflow:hidden;}
+    .btn-submit::after,.btn-hero::after,.btn-post::after,.btn-cta1::after,.btn-match::after,.match-assign-btn::after,.btn-dashboard::after,.em-btn::after,.ai-rec-action::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);transform:translateX(-200%);transition:transform .45s;}
+    .btn-submit:hover::after,.btn-hero:hover::after,.btn-post:hover::after,.btn-cta1:hover::after,.btn-match:hover::after,.match-assign-btn:hover::after,.btn-dashboard:hover::after,.em-btn:hover::after,.ai-rec-action:hover::after{transform:translateX(200%);}
+    /* nav item left-bar indicator */
+    .nav-item.active{border-left:3px solid var(--accent);padding-left:9px;transition:all .2s;}
+    /* input focus ring */
+    .form-input:focus,.lb-search:focus{box-shadow:0 0 0 3px rgba(0,200,150,.15)!important;}
+    /* progress bar */
+    #ks-progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:9999;width:0%;transition:width .1s linear;box-shadow:0 0 6px rgba(0,200,150,.6);}
+    /* ripple */
+    .ks-ripple{position:absolute;border-radius:50%;background:rgba(0,200,150,.25);transform:scale(0);animation:ks-rippleAnim .55s linear;pointer-events:none;}
+    @keyframes ks-rippleAnim{to{transform:scale(4);opacity:0;}}
+  `;
+  document.head.appendChild(style);
+
+  /* ── PROGRESS BAR ── */
+  const pb=document.createElement('div');pb.id='ks-progress';document.body.prepend(pb);
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement.scrollHeight-innerHeight;
+    if(h>0) pb.style.width=(scrollY/h*100)+'%';
+  });
+
+  /* ── SCROLL REVEAL OBSERVER ── */
+  // tag eligible elements
+  const selectors=['.stat-card','.section-card','.task-card','.task-item','.lb-row:not(.header)','.badge-item','.bw-item','.podium-card','.city-card','.tov-card','.ngo-card','.f-card','.step-card','.activity-item','.pstat','.match-card','.donate-card','.community-card','.post-card','.ai-rec-card','.form-card','.auth-box','.ai-panel'];
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('ks-in'),i*40);
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:.08});
+  setTimeout(()=>{
+    document.querySelectorAll(selectors.join(',')).forEach((el,i)=>{
+      el.classList.add('ks-reveal');
+      el.style.transitionDelay=(i%6)*0.04+'s';
+      obs.observe(el);
+    });
+  },100);
+
+  /* ── RIPPLE ON BUTTONS ── */
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('button');
+    if(!btn) return;
+    const r=btn.getBoundingClientRect(),sz=Math.max(r.width,r.height);
+    const rip=document.createElement('span');
+    rip.className='ks-ripple';
+    rip.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px`;
+    btn.appendChild(rip);
+    setTimeout(()=>rip.remove(),560);
+    // click sparks
+    for(let i=0;i<8;i++){
+      const s=document.createElement('div');
+      const a=Math.random()*Math.PI*2,d=20+Math.random()*35;
+      s.style.cssText=`position:fixed;pointer-events:none;z-index:9997;width:4px;height:4px;border-radius:50%;background:var(--accent);left:${e.clientX}px;top:${e.clientY}px;transform:translate(-50%,-50%);transition:all .5s cubic-bezier(.1,.8,.2,1)`;
+      document.body.appendChild(s);
+      requestAnimationFrame(()=>{s.style.transform=`translate(${Math.cos(a)*d-2}px,${Math.sin(a)*d-2}px)`;s.style.opacity='0';s.style.width='2px';s.style.height='2px';});
+      setTimeout(()=>s.remove(),510);
+    }
+  });
+
+  /* ── TILT CARDS ── */
+  document.querySelectorAll('.stat-card,.badge-item,.podium-card,.city-card,.f-card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`translateY(-4px) rotateX(${-y*6}deg) rotateY(${x*6}deg)`;
+      card.style.transformStyle='preserve-3d';
+    });
+    card.addEventListener('mouseleave',()=>{card.style.transform='';});
+  });
+
+  /* ── COUNTER ANIMATION ── */
+  function animateCounter(el,target,suffix){
+    let start=null,orig=el.textContent;
+    const fmt=n=>n.toLocaleString()+suffix;
+    const step=ts=>{
+      if(!start)start=ts;
+      const p=Math.min((ts-start)/1400,1),ease=1-Math.pow(1-p,3);
+      el.textContent=fmt(Math.round(ease*target));
+      if(p<1)requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  const cObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const el=e.target;
+      const raw=el.textContent.replace(/,/g,'');
+      const num=parseFloat(raw);
+      const suffix=raw.replace(/[\d.]/g,'').replace(num.toString().replace(/,/g,''),'');
+      if(!isNaN(num)&&num>10)animateCounter(el,num,suffix);
+      cObs.unobserve(el);
+    });
+  },{threshold:.5});
+  document.querySelectorAll('.stat-card-num,.stat-num,.podium-pts,.lb-pts,.lb-pts-val,.yrb-pts,.pstat-num').forEach(el=>cObs.observe(el));
+
+  /* ── SIDEBAR NAV SLIDE ── */
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('mouseenter',()=>{item.style.paddingLeft='16px';});
+    item.addEventListener('mouseleave',()=>{if(!item.classList.contains('active'))item.style.paddingLeft='';});
+  });
+
+  /* ── INPUT FOCUS LABELS ── */
+  document.querySelectorAll('.form-input').forEach(inp=>{
+    inp.addEventListener('focus',()=>{inp.style.background='var(--surface)';});
+    inp.addEventListener('blur',()=>{inp.style.background='';});
+  });
+
+  /* ── THEME TOGGLE SPIN ── */
+  const tBtn=document.getElementById('themeBtn');
+  if(tBtn){
+    tBtn.addEventListener('click',()=>{
+      tBtn.style.transform='rotate(360deg)';
+      tBtn.style.transition='transform .4s cubic-bezier(.34,1.56,.64,1)';
+      setTimeout(()=>{tBtn.style.transform='';},420);
+    });
+  }
+
+  /* ── STAT CARD ACCENT BAR ── */
+  document.querySelectorAll('.stat-card').forEach(c=>{
+    const bar=document.createElement('div');
+    bar.style.cssText='position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);border-radius:0 0 14px 14px;transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.77,0,.18,1);';
+    c.style.position='relative';c.style.overflow='hidden';
+    c.appendChild(bar);
+    c.addEventListener('mouseenter',()=>{bar.style.transform='scaleX(1)';});
+    c.addEventListener('mouseleave',()=>{bar.style.transform='scaleX(0)';});
+  });
+
+  /* ── BADGE FLOAT ON HOVER ── */
+  document.querySelectorAll('.badge-emoji,.pb,.bw-emoji').forEach(em=>{
+    em.addEventListener('mouseenter',()=>{em.style.animation='ks-float 1s ease-in-out infinite';em.style.display='inline-block';});
+    em.addEventListener('mouseleave',()=>{em.style.animation='';});
+  });
+
+  /* ── AVATAR PULSE ON HOVER ── */
+  document.querySelectorAll('.user-av,.lb-av,.ngo-av,.match-av,.podium-av,.yrb-av').forEach(av=>{
+    av.addEventListener('mouseenter',()=>{av.style.animation='ks-pulse-ring 1s ease-out infinite';});
+    av.addEventListener('mouseleave',()=>{av.style.animation='';});
+  });
+
+  /* ── EMERGENCY BANNER ATTENTION SHAKE ── */
+  const em=document.getElementById('emergencyBanner');
+  if(em&&!em.classList.contains('hidden')){
+    const shakeStyle=document.createElement('style');
+    shakeStyle.textContent='@keyframes ks-shake{0%,100%{transform:none}10%,30%,50%,70%,90%{transform:translateX(-4px)}20%,40%,60%,80%{transform:translateX(4px)}}';
+    document.head.appendChild(shakeStyle);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},1200);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},5000);
+  }
+
+  /* ── LB ROW HOVER RANK HIGHLIGHT ── */
+  document.querySelectorAll('.lb-row:not(.header):not(.you)').forEach(row=>{
+    row.addEventListener('mouseenter',()=>{row.style.background='var(--surface2)';row.style.paddingLeft='28px';row.style.transition='all .2s';});
+    row.addEventListener('mouseleave',()=>{row.style.background='';row.style.paddingLeft='';});
+  });
+
+  /* ── PODIUM CROWN FLOAT ── */
+  document.querySelectorAll('.podium-crown').forEach(c=>{
+    c.style.display='inline-block';c.style.animation='ks-float 2.5s ease-in-out infinite';
+    c.style.animationDelay=Math.random()*.8+'s';
+  });
+
+  /* ── BLINK DOT PULSE ── */
+  document.querySelectorAll('.em-dot,.badge-dot,.ai-dot,.tag-dot').forEach(dot=>{
+    dot.style.boxShadow='0 0 0 0 rgba(0,200,150,.4)';
+    dot.style.animation='blink 2s infinite, ks-pulse-ring 2s ease-out infinite';
+  });
+
+  /* ── TASK CARD URGENCY PULSE ── */
+  document.querySelectorAll('.task-status.urgent,.urgency.high').forEach(el=>{
+    el.style.animation='ks-shimmer 1.6s ease-in-out infinite';
+  });
+
+  /* ── PAGE ENTRY FADE ── */
+  document.body.style.opacity='0';
+  document.body.style.transition='opacity .4s ease';
+  window.addEventListener('load',()=>{document.body.style.opacity='1';});
+
+  /* ── SMOOTH LINK TRANSITIONS ── */
+  document.querySelectorAll('[onclick*="location.href"],[onclick*="window.location"]').forEach(el=>{
+    el.addEventListener('click',e=>{
+      e.preventDefault();
+      const match=el.getAttribute('onclick').match(/href='([^']+)'/);
+      if(match){
+        document.body.style.opacity='0';
+        setTimeout(()=>{window.location.href=match[1];},300);
+      }
+    });
+  });
+
+})();
+</script>
+
+<style>
+/* leaderboard specific */
+.podium-card.p1{animation:ks-popIn .6s .05s both;}
+.podium-card.p2{animation:ks-popIn .6s .15s both;}
+.podium-card.p3{animation:ks-popIn .6s .1s both;}
+/* rank bar entrance */
+.your-rank-bar{animation:slideUp .5s .3s cubic-bezier(.34,1.2,.64,1) both;}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:none;opacity:1}}
+/* filter tab hover */
+.filter-tab{transition:all .2s cubic-bezier(.34,1.2,.64,1)!important;}
+.filter-tab:hover:not(.active){transform:translateY(-1px);}
+/* lb search focus */
+.lb-search:focus{box-shadow:0 0 0 3px rgba(0,200,150,.15)!important;outline:none;}
+/* badge wall items stagger */
+.bw-item{transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .2s;}
+.bw-item:hover{transform:translateY(-3px) scale(1.04);}
+/* progress fill pulse */
+.yrb-fill{position:relative;overflow:hidden;}
+.yrb-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:yrb-sweep 2s linear infinite;}
+@keyframes yrb-sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+/* gold podium crown bounce */
+.podium-card.p1 .podium-crown{animation:ks-float 2s ease-in-out infinite!important;}
+/* rank number pop */
+.lb-rank-num.r1{animation:ks-popIn .4s .5s both;}
+</style>
+<script>
+(function(){
+  /* stagger lb rows as they're rendered — observe DOM changes */
+  const rowObs=new MutationObserver(()=>{
+    document.querySelectorAll('#lbRows .lb-row').forEach((r,i)=>{
+      if(r.dataset.animated)return;
+      r.dataset.animated='1';
+      r.style.opacity='0';r.style.transform='translateX(-12px)';
+      r.style.transition=`opacity .35s ${i*.04}s ease,transform .35s ${i*.04}s ease`;
+      setTimeout(()=>{r.style.opacity='1';r.style.transform='none';},50+i*40);
+    });
+  });
+  const lbRows=document.getElementById('lbRows');
+  if(lbRows)rowObs.observe(lbRows,{childList:true});
+  /* badge wall hover sound-like wiggle */
+  document.querySelectorAll('.bw-emoji').forEach(em=>{
+    em.parentElement?.parentElement?.addEventListener('mouseenter',()=>{
+      em.style.animation='ks-float 1s ease-in-out infinite';em.style.display='inline-block';
+    });
+    em.parentElement?.parentElement?.addEventListener('mouseleave',()=>{em.style.animation='';});
+  });
+})();
+</script>
+</body>
+</html>

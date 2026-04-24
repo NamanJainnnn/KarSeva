@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <script>
+  (function(){
+    const t = localStorage.getItem('ksTheme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KarSeva — My Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    [data-theme="dark"]{--bg:#0A0F0D;--surface:#111714;--surface2:#182018;--border:#1E2B22;--accent:#00C896;--accent-dim:rgba(0,200,150,.12);--accent-border:rgba(0,200,150,.28);--text:#F0FFF8;--muted:#7A9E8A;--danger:#EF4444;--danger-dim:rgba(239,68,68,.1);}
+    [data-theme="light"]{--bg:#F2FCF7;--surface:#FFFFFF;--surface2:#E8F5EE;--border:#C8E6D6;--accent:#009E72;--accent-dim:rgba(0,158,114,.10);--accent-border:rgba(0,158,114,.32);--text:#071A0F;--muted:#3D7A58;--danger:#DC2626;--danger-dim:rgba(220,38,38,.08);}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;transition:background .35s,color .35s;}
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;z-index:100;transition:background .35s;}
+    .sidebar-logo{font-size:20px;font-weight:800;letter-spacing:-.02em;padding:0 12px;margin-bottom:32px;}
+    .sidebar-logo span{color:var(--accent);}
+    .nav-section-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 12px;margin-bottom:8px;margin-top:20px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .2s,color .2s;margin-bottom:2px;}
+    .nav-item:hover{background:var(--surface2);color:var(--text);}
+    .nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:700;}
+    .nav-icon{font-size:17px;width:20px;text-align:center;}
+    .sidebar-bottom{margin-top:auto;}
+    .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);}
+    .user-av{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .user-name{font-size:13px;font-weight:700;}
+    .user-role{font-size:11px;color:var(--muted);}
+    .main{margin-left:240px;padding:32px;min-height:100vh;}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+    .topbar h1{font-size:22px;font-weight:800;letter-spacing:-.01em;}
+    .topbar p{font-size:14px;color:var(--muted);margin-top:2px;}
+    .theme-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+    .theme-toggle:hover{border-color:var(--accent);}
+
+    /* PROFILE LAYOUT */
+    .profile-grid{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;}
+
+    /* PROFILE CARD */
+    .profile-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;transition:background .35s;}
+    .profile-av-wrap{position:relative;display:inline-block;margin-bottom:16px;}
+    .profile-av{width:90px;height:90px;border-radius:20px;background:var(--accent);color:#0A0F0D;font-size:32px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto;}
+    .profile-av-edit{position:absolute;bottom:-6px;right:-6px;width:26px;height:26px;border-radius:7px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:border-color .2s;}
+    .profile-av-edit:hover{border-color:var(--accent);}
+    .profile-name{font-size:20px;font-weight:800;margin-bottom:4px;}
+    .profile-role{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:4px;}
+    .profile-city{font-size:13px;color:var(--muted);margin-bottom:20px;}
+    .profile-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;}
+    .ps-item{background:var(--surface2);border-radius:10px;padding:12px 8px;}
+    .ps-num{font-size:18px;font-weight:800;color:var(--accent);}
+    .ps-label{font-size:11px;color:var(--muted);margin-top:2px;}
+    .profile-badges{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:20px;}
+    .pb-item{font-size:20px;padding:6px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);}
+    .pb-item.locked{opacity:.3;filter:grayscale(1);}
+    .avail-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:10px;padding:12px 14px;}
+    .avail-label{font-size:13px;font-weight:600;}
+    .toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+    .toggle-switch input{opacity:0;width:0;height:0;}
+    .toggle-track{position:absolute;inset:0;background:var(--border);border-radius:99px;cursor:pointer;transition:background .25s;}
+    .toggle-track::after{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .25s;}
+    .toggle-switch input:checked + .toggle-track{background:var(--accent);}
+    .toggle-switch input:checked + .toggle-track::after{transform:translateX(18px);}
+
+    /* FORM SECTIONS */
+    .section-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;transition:background .35s;}
+    .section-card:last-child{margin-bottom:0;}
+    .sc-title{font-size:16px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.full{grid-column:1/-1;}
+    .form-label{font-size:13px;font-weight:600;color:var(--muted);}
+    .form-input{padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:var(--accent);}
+    .form-input::placeholder{color:var(--muted);}
+    .form-input:disabled{opacity:.5;cursor:not-allowed;}
+    select.form-input{cursor:pointer;}
+    textarea.form-input{resize:vertical;min-height:80px;}
+
+    /* SKILLS */
+    .skills-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+    .skill-chip{padding:7px 14px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+    .skill-chip:hover{border-color:var(--accent);color:var(--accent);}
+    .skill-chip.selected{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+
+    /* BUTTONS */
+    .btn-save{padding:12px 28px;border-radius:10px;background:var(--accent);color:#0A0F0D;font-size:14px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;transition:opacity .2s,transform .15s;}
+    .btn-save:hover{opacity:.88;transform:translateY(-1px);}
+    .btn-save:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .btn-danger{padding:10px 20px;border-radius:10px;border:1px solid rgba(239,68,68,.4);background:var(--danger-dim);color:var(--danger);font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:background .2s;}
+    .btn-danger:hover{background:rgba(239,68,68,.2);}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:28px;right:28px;background:var(--surface);border:1px solid var(--accent-border);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:700;color:var(--accent);z-index:999;display:none;}
+    .toast.show{display:block;animation:fadeUp .25s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+    /* DANGER ZONE */
+    .danger-zone{background:var(--danger-dim);border:1px solid rgba(239,68,68,.25);border-radius:16px;padding:24px;margin-bottom:20px;}
+    .dz-title{font-size:15px;font-weight:800;color:var(--danger);margin-bottom:8px;}
+    .dz-sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
+
+    /* VOLUNTEER ID */
+    .vol-id-card{background:linear-gradient(135deg,var(--surface2) 0%,var(--surface) 100%);border:1px solid var(--accent-border);border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;}
+    .vol-id-icon{font-size:28px;}
+    .vol-id-num{font-size:18px;font-weight:800;color:var(--accent);letter-spacing:.08em;}
+    .vol-id-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+    .vol-id-badge{margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:99px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+
+    @media(max-width:900px){.sidebar{display:none;}.main{margin-left:0;padding:20px;}.profile-grid{grid-template-columns:1fr;}.form-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">Kar<span>Seva</span></div>
+  <div class="nav-section-label">Main</div>
+  <div class="nav-item" onclick="location.href='dashboard.html'"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="location.href='tasks.html'"><span class="nav-icon">✅</span> Tasks</div>
+  <div class="nav-item" onclick="location.href='community.html'"><span class="nav-icon">👥</span> Community</div>
+  <div class="nav-item" onclick="location.href='leaderboard.html'"><span class="nav-icon">🏅</span> Leaderboard</div>
+  <div class="nav-item" onclick="location.href='donate.html'"><span class="nav-icon">❤️</span> Donate</div>
+  <div class="nav-item" id="adminNav" style="display:none;" onclick="location.href='admin.html'"><span class="nav-icon">🧠</span> Admin Panel</div>
+  <div class="nav-section-label">Account</div>
+  <div class="nav-item active"><span class="nav-icon">👤</span> My Profile</div>
+  <div class="nav-item" onclick="location.href='settings.html'"><span class="nav-icon">⚙️</span> Settings</div>
+  <div class="nav-item" id="myNgoTab" style="display:none;" onclick="location.href='ngoprofile.html'">
+  <span class="nav-icon">🏛️</span> My NGO
+</div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-av" id="sidebarAv">--</div>
+      <div>
+        <div class="user-name" id="sidebarName">Loading...</div>
+        <div class="user-role" id="sidebarRole">Volunteer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ Profile saved successfully!</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>👤 My Profile</h1>
+      <p>Manage your volunteer identity and preferences</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn">🌙</button>
+  </div>
+
+  <div class="profile-grid">
+
+    <!-- LEFT COLUMN -->
+    <div>
+      <!-- PROFILE CARD -->
+      <div class="profile-card" style="margin-bottom:20px;">
+        <div class="profile-av-wrap">
+          <div class="profile-av" id="profileAv">--</div>
+          <div class="profile-av-edit" title="Change avatar">✏️</div>
+        </div>
+        <div class="profile-name" id="profileName">Loading...</div>
+        <div class="profile-role" id="profileRole">Volunteer</div>
+        <div class="profile-city" id="profileCity">📍 --</div>
+        <div class="profile-stats">
+          <div class="ps-item"><div class="ps-num" id="statPts">0</div><div class="ps-label">Points</div></div>
+          <div class="ps-item"><div class="ps-num" id="statDone">0</div><div class="ps-label">Tasks</div></div>
+          <div class="ps-item"><div class="ps-num" id="statBadges">0</div><div class="ps-label">Badges</div></div>
+        </div>
+        <div class="profile-badges" id="profileBadges">
+          <div class="pb-item">🚀</div>
+          <div class="pb-item locked">🏅</div>
+          <div class="pb-item locked">⭐</div>
+          <div class="pb-item locked">🔥</div>
+          <div class="pb-item locked">💎</div>
+          <div class="pb-item locked">👑</div>
+        </div>
+        <div class="avail-row">
+          <span class="avail-label">Available for tasks</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="availToggle" onchange="saveAvailability()"/>
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- VOLUNTEER ID -->
+      <div class="section-card">
+        <div class="sc-title">🪪 Volunteer ID</div>
+        <div class="vol-id-card">
+          <div class="vol-id-icon">🆔</div>
+          <div>
+            <div class="vol-id-num" id="volId">KS-000000</div>
+            <div class="vol-id-sub">Verified KarSeva Member</div>
+          </div>
+          <div class="vol-id-badge">✅ Verified</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+
+      <!-- BASIC INFO -->
+      <div class="section-card">
+        <div class="sc-title">📝 Basic Information</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-input" type="text" id="firstName" placeholder="Naman"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" type="text" id="lastName" placeholder="Jain "/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" type="email" id="email" placeholder="you@example.com" disabled/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input class="form-input" type="tel" id="phone" placeholder="+91 98765 43210"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input class="form-input" type="text" id="city" placeholder="Indore"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">State</label>
+            <select class="form-input" id="state">
+              <option value="">Select state</option>
+              <option>Madhya Pradesh</option>
+              <option>Maharashtra</option>
+              <option>Delhi</option>
+              <option>Gujarat</option>
+              <option>Karnataka</option>
+              <option>Tamil Nadu</option>
+              <option>Uttar Pradesh</option>
+              <option>West Bengal</option>
+              <option>Rajasthan</option>
+              <option>Punjab</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Bio</label>
+            <textarea class="form-input" id="bio" placeholder="Tell the community a bit about yourself — your background, why you volunteer, what causes you care about..."></textarea>
+          </div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;">
+          <button class="btn-save" id="saveBasicBtn" onclick="saveBasicInfo()">Save Changes</button>
+        </div>
+      </div>
+
+      <!-- SKILLS -->
+      <div class="section-card">
+        <div class="sc-title">🛠️ Skills & Expertise</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Select all skills you have — this helps our AI match you to the right tasks.</p>
+        <div class="skills-wrap" id="skillsWrap">
+          <button class="skill-chip" onclick="toggleSkill(this)">🏥 Medical / First Aid</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">📚 Teaching / Education</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">🚗 Driving / Logistics</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">💻 Tech / IT</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">🍳 Cooking / Food</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">🌱 Environment</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">🧱 Construction</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">📢 Communication</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">💰 Finance / Accounts</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">🎨 Creative / Design</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">🩺 Mental Health Support</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">⚖️ Legal Aid</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">📸 Photography / Video</button>
+          <button class="skill-chip" onclick="toggleSkill(this)">🗣️ Public Speaking</button>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="btn-save" onclick="saveSkills()">Save Skills</button>
+        </div>
+      </div>
+
+      <!-- AVAILABILITY -->
+      <div class="section-card">
+        <div class="sc-title">📅 Availability Preferences</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Available Days</label>
+            <select class="form-input" id="availDays">
+              <option>Weekends only</option>
+              <option>Weekdays only</option>
+              <option>Any day</option>
+              <option>Flexible</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hours per Week</label>
+            <select class="form-input" id="availHours">
+              <option>1–3 hours</option>
+              <option>4–8 hours</option>
+              <option>8–16 hours</option>
+              <option>Full time</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Travel Radius</label>
+            <select class="form-input" id="travelRadius">
+              <option>Within 5 km</option>
+              <option>Within 15 km</option>
+              <option>Within 30 km</option>
+              <option>Anywhere in my city</option>
+              <option>Willing to travel to other cities</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preferred Cause</label>
+            <select class="form-input" id="prefCause">
+              <option>Any cause</option>
+              <option>Disaster Relief</option>
+              <option>Education</option>
+              <option>Healthcare</option>
+              <option>Environment</option>
+              <option>Food & Hunger</option>
+              <option>Women Safety</option>
+              <option>Animal Welfare</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="btn-save" onclick="saveAvailPrefs()">Save Preferences</button>
+        </div>
+      </div>
+
+      <!-- SOCIAL LINKS -->
+      <div class="section-card">
+        <div class="sc-title">🔗 Social Links</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">LinkedIn</label>
+            <input class="form-input" type="url" id="linkedin" placeholder="https://linkedin.com/in/yourname"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Twitter / X</label>
+            <input class="form-input" type="url" id="twitter" placeholder="https://twitter.com/yourhandle"/>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Personal Website</label>
+            <input class="form-input" type="url" id="website" placeholder="https://yourwebsite.com"/>
+          </div>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="btn-save" onclick="saveSocial()">Save Links</button>
+        </div>
+      </div>
+
+      <!-- CHANGE PASSWORD -->
+      <div class="section-card">
+        <div class="sc-title">🔒 Change Password</div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">Current Password</label>
+            <input class="form-input" type="password" id="currentPwd" placeholder="Enter current password"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input class="form-input" type="password" id="newPwd" placeholder="Min. 6 characters"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm New Password</label>
+            <input class="form-input" type="password" id="confirmPwd" placeholder="Repeat new password"/>
+          </div>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="btn-save" onclick="changePassword()">Update Password</button>
+        </div>
+      </div>
+
+      <!-- DANGER ZONE -->
+      <div class="danger-zone">
+        <div class="dz-title">⚠️ Danger Zone</div>
+        <div class="dz-sub">These actions are permanent and cannot be undone.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-danger" onclick="signOutUser()">Sign Out</button>
+          <button class="btn-danger" onclick="confirmDelete()">Delete Account</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBM1zpNgjrztamRcvRJlJZxZhUrHqx6xTo",
+    authDomain: "karseva-1fb4f.firebaseapp.com",
+    projectId: "karseva-1fb4f",
+    storageBucket: "karseva-1fb4f.firebasestorage.app",
+    messagingSenderId: "4741841467",
+    appId: "1:4741841467:web:780939d385e60af936521e"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  let uid = null;
+
+  function toast(msg, isError) {
+    const t = document.getElementById('toast');
+    t.textContent = (isError ? '❌ ' : '✅ ') + msg;
+    t.style.borderColor = isError ? 'rgba(239,68,68,.4)' : 'var(--accent-border)';
+    t.style.color = isError ? 'var(--danger)' : 'var(--accent)';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'auth.html'; return; }
+    uid = user.uid;
+    const snap = await getDoc(doc(db, 'users', uid));
+    const p = snap.exists() ? snap.data() : {};
+
+    const fn = p.firstName || '';
+    const ln = p.lastName  || '';
+    const initials = ((fn[0]||'U') + (ln[0]||'')).toUpperCase();
+
+    // sidebar
+    document.getElementById('sidebarAv').textContent   = initials;
+    document.getElementById('sidebarName').textContent = `${fn} ${ln}`.trim();
+    document.getElementById('sidebarRole').textContent = p.role === 'ngo' ? 'NGO Admin' : 'Volunteer';
+    if (p.role === 'ngo') document.getElementById('adminNav').style.display = 'flex';
+    const ngoTab = document.getElementById('myNgoTab');
+    if (ngoTab) ngoTab.style.display = profile.role === 'ngo' ? 'flex' : 'none';
+
+    // profile card
+    document.getElementById('profileAv').textContent   = initials;
+    document.getElementById('profileName').textContent = `${fn} ${ln}`.trim() || 'No Name';
+    document.getElementById('profileRole').textContent = p.role === 'ngo' ? 'NGO Admin' : 'Volunteer';
+    document.getElementById('profileCity').textContent = p.city ? `📍 ${p.city}` : '📍 Location not set';
+    document.getElementById('statPts').textContent     = (p.points||0).toLocaleString();
+    document.getElementById('statDone').textContent    = p.tasksCompleted || 0;
+    document.getElementById('statBadges').textContent  = (p.badges||[]).length;
+
+    // volunteer ID
+    document.getElementById('volId').textContent = 'KS-' + uid.slice(0,6).toUpperCase();
+
+    // availability
+    document.getElementById('availToggle').checked = p.available !== false;
+
+    // basic info fields
+    document.getElementById('firstName').value  = fn;
+    document.getElementById('lastName').value   = ln;
+    document.getElementById('email').value      = user.email || '';
+    document.getElementById('phone').value      = p.phone || '';
+    document.getElementById('city').value       = p.city  || '';
+    document.getElementById('state').value      = p.state || '';
+    document.getElementById('bio').value        = p.bio   || '';
+
+    // skills
+    const savedSkills = p.skills || [];
+    document.querySelectorAll('.skill-chip').forEach(chip => {
+      if (savedSkills.includes(chip.textContent.trim())) chip.classList.add('selected');
+    });
+
+    // availability prefs
+    if (p.availDays)    document.getElementById('availDays').value    = p.availDays;
+    if (p.availHours)   document.getElementById('availHours').value   = p.availHours;
+    if (p.travelRadius) document.getElementById('travelRadius').value = p.travelRadius;
+    if (p.prefCause)    document.getElementById('prefCause').value    = p.prefCause;
+
+    // social
+    document.getElementById('linkedin').value = p.linkedin || '';
+    document.getElementById('twitter').value  = p.twitter  || '';
+    document.getElementById('website').value  = p.website  || '';
+
+    // badges wall
+    const earned = p.badges || [];
+    const allBadges = ['🚀','🏅','⭐','🔥','💎','👑'];
+    document.getElementById('profileBadges').innerHTML = allBadges.map(b =>
+      `<div class="pb-item ${earned.includes(b)?'':'locked'}" title="${earned.includes(b)?'Earned':'Locked'}">${b}</div>`
+    ).join('');
+  });
+
+  window.toggleSkill = (el) => el.classList.toggle('selected');
+
+  window.saveBasicInfo = async () => {
+    const btn = document.getElementById('saveBasicBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    const fn = document.getElementById('firstName').value.trim();
+    const ln = document.getElementById('lastName').value.trim();
+    const city = document.getElementById('city').value.trim();
+    try {
+      await updateDoc(doc(db, 'users', uid), {
+        firstName: fn, lastName: ln, city,
+        phone: document.getElementById('phone').value.trim(),
+        state: document.getElementById('state').value,
+        bio:   document.getElementById('bio').value.trim(),
+        updatedAt: serverTimestamp()
+      });
+      // update profile card live
+      const initials = ((fn[0]||'U')+(ln[0]||'')).toUpperCase();
+      document.getElementById('profileAv').textContent   = initials;
+      document.getElementById('sidebarAv').textContent   = initials;
+      document.getElementById('profileName').textContent = `${fn} ${ln}`.trim();
+      document.getElementById('sidebarName').textContent = `${fn} ${ln}`.trim();
+      document.getElementById('profileCity').textContent = city ? `📍 ${city}` : '📍 Location not set';
+      toast('Basic info saved!');
+    } catch(e) { toast('Failed to save. Try again.', true); }
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  };
+
+  window.saveSkills = async () => {
+    const skills = [...document.querySelectorAll('.skill-chip.selected')].map(c => c.textContent.trim());
+    try {
+      await updateDoc(doc(db, 'users', uid), { skills, updatedAt: serverTimestamp() });
+      toast(`${skills.length} skills saved!`);
+    } catch(e) { toast('Failed to save skills.', true); }
+  };
+
+  window.saveAvailability = async () => {
+    const isOn = document.getElementById('availToggle').checked;
+    try {
+      await updateDoc(doc(db, 'users', uid), { available: isOn });
+      toast(isOn ? 'You are now available for tasks!' : 'You are now set to unavailable.');
+    } catch(e) {}
+  };
+
+  window.saveAvailPrefs = async () => {
+    try {
+      await updateDoc(doc(db, 'users', uid), {
+        availDays:    document.getElementById('availDays').value,
+        availHours:   document.getElementById('availHours').value,
+        travelRadius: document.getElementById('travelRadius').value,
+        prefCause:    document.getElementById('prefCause').value,
+        updatedAt: serverTimestamp()
+      });
+      toast('Availability preferences saved!');
+    } catch(e) { toast('Failed to save.', true); }
+  };
+
+  window.saveSocial = async () => {
+    try {
+      await updateDoc(doc(db, 'users', uid), {
+        linkedin: document.getElementById('linkedin').value.trim(),
+        twitter:  document.getElementById('twitter').value.trim(),
+        website:  document.getElementById('website').value.trim(),
+        updatedAt: serverTimestamp()
+      });
+      toast('Social links saved!');
+    } catch(e) { toast('Failed to save.', true); }
+  };
+
+  window.changePassword = async () => {
+    const current = document.getElementById('currentPwd').value;
+    const newPwd  = document.getElementById('newPwd').value;
+    const confirm = document.getElementById('confirmPwd').value;
+    if (!current || !newPwd) { toast('Please fill in all password fields.', true); return; }
+    if (newPwd !== confirm)  { toast('New passwords do not match.', true); return; }
+    if (newPwd.length < 6)   { toast('Password must be at least 6 characters.', true); return; }
+    try {
+      const cred = EmailAuthProvider.credential(auth.currentUser.email, current);
+      await reauthenticateWithCredential(auth.currentUser, cred);
+      await updatePassword(auth.currentUser, newPwd);
+      document.getElementById('currentPwd').value = '';
+      document.getElementById('newPwd').value = '';
+      document.getElementById('confirmPwd').value = '';
+      toast('Password updated successfully!');
+    } catch(e) {
+      if (e.code === 'auth/wrong-password') toast('Current password is incorrect.', true);
+      else toast('Failed to update password.', true);
+    }
+  };
+
+  window.signOutUser = async () => {
+    await signOut(auth);
+    window.location.href = 'auth.html';
+  };
+
+  window.confirmDelete = () => {
+    if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+      deleteUser(auth.currentUser)
+        .then(() => { window.location.href = 'index.html'; })
+        .catch(() => toast('Please sign out and sign back in before deleting your account.', true));
+    }
+  };
+
+  document.getElementById('themeBtn').addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = dark ? 'light' : 'dark';
+
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+
+  localStorage.setItem('ksTheme', next);
+});
+</script>
+</body>
+</html>

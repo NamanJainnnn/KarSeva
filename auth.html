@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <script>
+  (function(){
+    const t = localStorage.getItem('ksTheme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KarSeva — Join the Movement</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+    [data-theme="dark"]{
+      --bg:#0A0F0D;--surface:#111714;--surface2:#182018;--border:#1E2B22;
+      --accent:#00C896;--accent-dim:rgba(0,200,150,.12);--accent-border:rgba(0,200,150,.28);
+      --text:#F0FFF8;--muted:#7A9E8A;--error:#EF4444;--error-dim:rgba(239,68,68,.1);
+    }
+    [data-theme="light"]{
+      --bg:#F2FCF7;--surface:#FFFFFF;--surface2:#E8F5EE;--border:#C8E6D6;
+      --accent:#009E72;--accent-dim:rgba(0,158,114,.10);--accent-border:rgba(0,158,114,.32);
+      --text:#071A0F;--muted:#3D7A58;--error:#DC2626;--error-dim:rgba(220,38,38,.08);
+    }
+
+    html{scroll-behavior:smooth;}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:'Inter',sans-serif;line-height:1.6;
+      min-height:100vh;
+      display:grid;grid-template-columns:1fr 1fr;
+      transition:background .35s,color .35s;
+      position:relative;
+    }
+
+    /* ONE big SVG spanning the full page background */
+    .page-deco{
+      position:fixed;inset:0;width:100%;height:100%;
+      pointer-events:none;z-index:0;opacity:.10;color:var(--accent);
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel{
+      background:transparent;
+      border-right:none;
+      display:flex;flex-direction:column;justify-content:flex-start;gap:40px;
+      padding:40px;position:relative;z-index:1;
+    }
+
+    .panel-logo{font-size:24px;font-weight:800;font-family:'Inter',sans-serif;letter-spacing:-.02em;}
+    .panel-logo span{color:var(--accent);}
+
+    .panel-content{position:relative;z-index:1;}
+    .panel-tag{
+      display:inline-flex;align-items:center;gap:8px;
+      background:var(--accent-dim);border:1px solid var(--accent-border);
+      border-radius:99px;padding:5px 14px;
+      font-size:12px;color:var(--accent);font-weight:600;
+      margin-bottom:24px;
+    }
+    .tag-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 2s infinite;}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+    .panel-title{font-size:clamp(28px,3vw,40px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:16px;}
+    .panel-title span{color:var(--accent);}
+    .panel-sub{font-size:15px;color:var(--muted);line-height:1.7;max-width:360px;margin-bottom:40px;}
+
+    .panel-stats{display:flex;flex-direction:column;gap:14px;}
+    .pstat{display:flex;align-items:center;gap:14px;}
+    .pstat-icon{width:40px;height:40px;border-radius:10px;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .pstat-num{font-size:18px;font-weight:800;color:var(--accent);}
+    .pstat-label{font-size:13px;color:var(--muted);}
+
+    .panel-footer{font-size:13px;color:var(--muted);position:relative;z-index:1;}
+
+    /* ── RIGHT PANEL ── */
+    .right-panel{
+      display:flex;align-items:flex-start;justify-content:center;
+      padding:60px 40px;position:relative;z-index:1;
+      background:transparent;
+    }
+    .right-panel::before{ display:none; }
+
+    .theme-toggle{
+      position:absolute;top:24px;right:24px;
+      width:38px;height:38px;border-radius:10px;
+      border:1px solid var(--border);background:var(--surface);
+      cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;
+      transition:border-color .2s,background .2s;
+    }
+    .theme-toggle:hover{border-color:var(--accent);background:var(--accent-dim);}
+
+    .auth-box{
+      width:100%;max-width:420px;position:relative;z-index:1;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:32px;
+    }
+
+    /* fix signup top spacing */
+    #signupForm .auth-title{ margin-top:0; }
+
+    .auth-tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:32px;}
+    .auth-tab{flex:1;padding:10px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:background .2s,color .2s;}
+    .auth-tab.active{background:var(--accent);color:#0A0F0D;}
+
+    .auth-title{font-size:24px;font-weight:800;margin-bottom:6px;}
+    .auth-sub{font-size:14px;color:var(--muted);margin-bottom:28px;}
+
+    /* ROLE SELECTOR */
+    .role-selector{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
+    .role-card{
+      border:1px solid var(--border);border-radius:12px;padding:14px;
+      cursor:pointer;transition:border-color .2s,background .2s;text-align:center;
+      background:transparent;
+    }
+    .role-card:hover{border-color:var(--accent);background:var(--accent-dim);}
+    .role-card.selected{border-color:var(--accent);background:var(--accent-dim);}
+    .role-icon{font-size:24px;margin-bottom:6px;}
+    .role-name{font-size:13px;font-weight:700;color:var(--text);}
+    .role-desc{font-size:11px;color:var(--muted);margin-top:2px;}
+
+    /* FORM */
+    .form-group{margin-bottom:18px;}
+    .form-label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:7px;}
+    .form-input{
+      width:100%;padding:12px 14px;border-radius:10px;
+      border:1px solid var(--border);background:var(--surface);
+      color:var(--text);font-size:15px;font-family:'Inter',sans-serif;
+      transition:border-color .2s,background .35s;outline:none;
+    }
+    .form-input:focus{border-color:var(--accent);}
+    .form-input::placeholder{color:var(--muted);}
+
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+    .btn-submit{
+      width:100%;padding:14px;border-radius:10px;
+      background:var(--accent);color:#0A0F0D;
+      font-size:16px;font-weight:800;font-family:'Inter',sans-serif;
+      border:none;cursor:pointer;
+      transition:opacity .2s,transform .15s;
+      margin-top:8px;
+    }
+    .btn-submit:hover{opacity:.88;transform:translateY(-1px);}
+    .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+    .divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+    .divider-line{flex:1;height:1px;background:var(--border);}
+    .divider-text{font-size:12px;color:var(--muted);}
+
+    .btn-google{
+      width:100%;padding:12px;border-radius:10px;
+      border:1px solid var(--border);background:var(--surface);
+      color:var(--text);font-size:15px;font-weight:700;font-family:'Inter',sans-serif;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+      transition:border-color .2s,background .2s;
+    }
+    .btn-google:hover{border-color:var(--accent);background:var(--accent-dim);}
+
+    .auth-switch{text-align:center;font-size:14px;color:var(--muted);margin-top:20px;}
+    .auth-switch a{color:var(--accent);font-weight:700;cursor:pointer;}
+
+    /* ERROR / SUCCESS */
+    .msg-box{
+      padding:12px 14px;border-radius:10px;font-size:14px;
+      margin-bottom:16px;display:none;
+    }
+    .msg-box.error{background:var(--error-dim);border:1px solid rgba(239,68,68,.3);color:var(--error);}
+    .msg-box.success{background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);}
+    .msg-box.show{display:block;}
+
+    /* loading spinner inside button */
+    .spinner{width:18px;height:18px;border:2px solid rgba(10,15,13,.3);border-top-color:#0A0F0D;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* SUCCESS SCREEN */
+    .success-screen{display:none;text-align:center;padding:20px 0;}
+    .success-screen.show{display:block;}
+    .success-icon{font-size:56px;margin-bottom:16px;}
+    .success-title{font-size:22px;font-weight:800;margin-bottom:8px;}
+    .success-sub{font-size:15px;color:var(--muted);margin-bottom:28px;}
+    .btn-dashboard{
+      display:inline-block;padding:13px 32px;border-radius:10px;
+      background:var(--accent);color:#0A0F0D;
+      font-size:15px;font-weight:800;font-family:'Inter',sans-serif;
+      border:none;cursor:pointer;transition:opacity .2s;
+    }
+    .btn-dashboard:hover{opacity:.88;}
+
+    @media(max-width:768px){
+      body{grid-template-columns:1fr;}
+      .left-panel{display:none;}
+      .right-panel{padding:24px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- FULL PAGE BACKGROUND SVG — spans both panels -->
+<svg class="page-deco" viewBox="0 0 1400 900" fill="currentColor" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <!-- main center hub -->
+  <circle cx="700" cy="450" r="32"/>
+  <circle cx="700" cy="450" r="20" fill="#0A0F0D" opacity=".5"/>
+  <!-- spokes to nodes -->
+  <line x1="700" y1="450" x2="140" y2="120" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8,6"/>
+  <line x1="700" y1="450" x2="420" y2="80"  stroke="currentColor" stroke-width="1.5" stroke-dasharray="8,6"/>
+  <line x1="700" y1="450" x2="980" y2="80"  stroke="currentColor" stroke-width="1.5" stroke-dasharray="8,6"/>
+  <line x1="700" y1="450" x2="1260" y2="120" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8,6"/>
+  <line x1="700" y1="450" x2="100"  y2="450" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8,6"/>
+  <line x1="700" y1="450" x2="1300" y2="450" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8,6"/>
+  <line x1="700" y1="450" x2="180"  y2="780" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8,6"/>
+  <line x1="700" y1="450" x2="500"  y2="840" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8,6"/>
+  <line x1="700" y1="450" x2="900"  y2="840" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8,6"/>
+  <line x1="700" y1="450" x2="1220" y2="780" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8,6"/>
+  <!-- secondary connections between nodes -->
+  <line x1="140" y1="120" x2="420" y2="80"  stroke="currentColor" stroke-width="1" stroke-dasharray="4,10" opacity=".5"/>
+  <line x1="420" y1="80"  x2="980" y2="80"  stroke="currentColor" stroke-width="1" stroke-dasharray="4,10" opacity=".5"/>
+  <line x1="980" y1="80"  x2="1260" y2="120" stroke="currentColor" stroke-width="1" stroke-dasharray="4,10" opacity=".5"/>
+  <line x1="100" y1="450" x2="180" y2="780"  stroke="currentColor" stroke-width="1" stroke-dasharray="4,10" opacity=".5"/>
+  <line x1="1300" y1="450" x2="1220" y2="780" stroke="currentColor" stroke-width="1" stroke-dasharray="4,10" opacity=".5"/>
+  <line x1="180" y1="780" x2="500" y2="840"  stroke="currentColor" stroke-width="1" stroke-dasharray="4,10" opacity=".5"/>
+  <line x1="500" y1="840" x2="900" y2="840"  stroke="currentColor" stroke-width="1" stroke-dasharray="4,10" opacity=".5"/>
+  <line x1="900" y1="840" x2="1220" y2="780" stroke="currentColor" stroke-width="1" stroke-dasharray="4,10" opacity=".5"/>
+  <!-- person nodes: top -->
+  <circle cx="140" cy="102" r="22"/><rect x="126" y="124" width="28" height="34" rx="10"/>
+  <circle cx="420" cy="62"  r="22"/><rect x="406" y="84"  width="28" height="34" rx="10"/>
+  <circle cx="980" cy="62"  r="22"/><rect x="966" y="84"  width="28" height="34" rx="10"/>
+  <circle cx="1260" cy="102" r="22"/><rect x="1246" y="124" width="28" height="34" rx="10"/>
+  <!-- person nodes: middle -->
+  <circle cx="100"  cy="432" r="22"/><rect x="86"   y="454" width="28" height="34" rx="10"/>
+  <circle cx="1300" cy="432" r="22"/><rect x="1286" y="454" width="28" height="34" rx="10"/>
+  <!-- person nodes: bottom -->
+  <circle cx="180"  cy="762" r="22"/><rect x="166"  y="784" width="28" height="34" rx="10"/>
+  <circle cx="500"  cy="822" r="22"/><rect x="486"  y="844" width="28" height="34" rx="10"/>
+  <circle cx="900"  cy="822" r="22"/><rect x="886"  y="844" width="28" height="34" rx="10"/>
+  <circle cx="1220" cy="762" r="22"/><rect x="1206" y="784" width="28" height="34" rx="10"/>
+  <!-- sparkle dots -->
+  <circle cx="700" cy="30"  r="6"/>
+  <circle cx="50"  cy="230" r="5"/>
+  <circle cx="1350" cy="230" r="5"/>
+  <circle cx="50"  cy="670" r="5"/>
+  <circle cx="1350" cy="670" r="5"/>
+  <circle cx="300" cy="30"  r="4"/>
+  <circle cx="1100" cy="30" r="4"/>
+  <circle cx="700" cy="870" r="5"/>
+</svg>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="panel-logo">Kar<span>Seva</span></div>
+
+  <div class="panel-content">
+    <div class="panel-tag"><div class="tag-dot"></div>India's #1 Volunteer Platform</div>
+    <h2 class="panel-title">Join thousands making a <span>real difference</span></h2>
+    <p class="panel-sub">KarSeva connects volunteers with verified NGOs across India. Sign up in 2 minutes and start making an impact today.</p>
+    <div class="panel-stats">
+      <div class="pstat"><div class="pstat-icon">🏛️</div><div><div class="pstat-num">500+</div><div class="pstat-label">Verified NGOs on platform</div></div></div>
+      <div class="pstat"><div class="pstat-icon">🙋</div><div><div class="pstat-num">12,000+</div><div class="pstat-label">Active volunteers across India</div></div></div>
+      <div class="pstat"><div class="pstat-icon">🤖</div><div><div class="pstat-num">2 min</div><div class="pstat-label">Average AI match time</div></div></div>
+    </div>
+  </div>
+
+  <div class="panel-footer">© 2026 KarSeva · Built by Naman Jain</div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <button class="theme-toggle" id="themeBtn">🌙</button>
+
+  <div class="auth-box">
+
+    <!-- TABS -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Log In</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- MESSAGE BOX -->
+    <div class="msg-box" id="msgBox"></div>
+
+    <!-- ── LOGIN FORM ── -->
+    <div id="loginForm">
+      <div class="auth-title">Welcome back 👋</div>
+      <div class="auth-sub">Log in to your KarSeva account</div>
+
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="loginPassword" placeholder="Enter your password"/>
+      </div>
+
+      <button class="btn-submit" id="loginBtn" onclick="handleLogin()">Log In</button>
+
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">or</div><div class="divider-line"></div></div>
+      <button class="btn-google" onclick="handleGoogleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="auth-switch">Don't have an account? <a onclick="switchTab('signup')">Sign up free</a></div>
+    </div>
+
+    <!-- ── SIGNUP FORM ── -->
+    <div id="signupForm" style="display:none;">
+      <div class="auth-title">Join KarSeva 🌱</div>
+      <div class="auth-sub">Create your free account in 2 minutes</div>
+
+      <!-- ROLE SELECTOR -->
+      <div class="role-selector">
+        <div class="role-card selected" id="role-volunteer" onclick="selectRole('volunteer')">
+          <div class="role-icon">🙋</div>
+          <div class="role-name">Volunteer</div>
+          <div class="role-desc">I want to help NGOs</div>
+        </div>
+        <div class="role-card" id="role-ngo" onclick="selectRole('ngo')">
+          <div class="role-icon">🏛️</div>
+          <div class="role-name">NGO</div>
+          <div class="role-desc">I represent an NGO</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First name</label>
+          <input class="form-input" type="text" id="signupFirst" placeholder="Ravi"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input class="form-input" type="text" id="signupLast" placeholder="Kumar"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">City</label>
+        <input class="form-input" type="text" id="signupCity" placeholder="Bhopal"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="signupPassword" placeholder="Min. 6 characters"/>
+      </div>
+
+      <button class="btn-submit" id="signupBtn" onclick="handleSignup()">Create Account</button>
+
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">or</div><div class="divider-line"></div></div>
+      <button class="btn-google" onclick="handleGoogleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="auth-switch">Already have an account? <a onclick="switchTab('login')">Log in</a></div>
+    </div>
+
+    <!-- SUCCESS SCREEN -->
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">You're in!</div>
+      <div class="success-sub" id="successMsg">Welcome to KarSeva. Your account has been created.</div>
+      <button class="btn-dashboard" onclick="window.location.href='dashboard.html'">Go to Dashboard →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBM1zpNgjrztamRcvRJlJZxZhUrHqx6xTo",
+    authDomain: "karseva-1fb4f.firebaseapp.com",
+    projectId: "karseva-1fb4f",
+    storageBucket: "karseva-1fb4f.firebasestorage.app",
+    messagingSenderId: "4741841467",
+    appId: "1:4741841467:web:780939d385e60af936521e"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  const googleProvider = new GoogleAuthProvider();
+
+  let selectedRole = 'volunteer';
+
+  // expose to window so onclick handlers can call them
+  window.selectRole = (role) => {
+    selectedRole = role;
+    document.getElementById('role-volunteer').classList.toggle('selected', role === 'volunteer');
+    document.getElementById('role-ngo').classList.toggle('selected', role === 'ngo');
+  };
+
+  window.switchTab = (tab) => {
+    const isLogin = tab === 'login';
+    document.getElementById('loginForm').style.display  = isLogin ? 'block' : 'none';
+    document.getElementById('signupForm').style.display = isLogin ? 'none'  : 'block';
+    document.getElementById('tab-login').classList.toggle('active',  isLogin);
+    document.getElementById('tab-signup').classList.toggle('active', !isLogin);
+    hideMsg();
+  };
+
+  function showMsg(text, type) {
+    const box = document.getElementById('msgBox');
+    box.textContent = text;
+    box.className = `msg-box ${type} show`;
+  }
+  function hideMsg() {
+    document.getElementById('msgBox').className = 'msg-box';
+  }
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.innerHTML = loading ? '<span class="spinner"></span>' : (btnId === 'loginBtn' ? 'Log In' : 'Create Account');
+  }
+
+  // save user profile to Firestore
+  async function saveUserProfile(uid, data) {
+    await setDoc(doc(db, 'users', uid), {
+      ...data,
+      createdAt: serverTimestamp(),
+      points: 0,
+      badges: [],
+      available: true,
+    });
+  }
+
+  window.handleSignup = async () => {
+    const first    = document.getElementById('signupFirst').value.trim();
+    const last     = document.getElementById('signupLast').value.trim();
+    const email    = document.getElementById('signupEmail').value.trim();
+    const city     = document.getElementById('signupCity').value.trim();
+    const password = document.getElementById('signupPassword').value;
+
+    if (!first || !last || !email || !city || !password) { showMsg('Please fill in all fields.', 'error'); return; }
+    if (password.length < 6) { showMsg('Password must be at least 6 characters.', 'error'); return; }
+
+    setLoading('signupBtn', true); hideMsg();
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await saveUserProfile(cred.user.uid, { firstName: first, lastName: last, email, city, role: selectedRole, displayName: `${first} ${last}` });
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('successMsg').textContent = `Welcome, ${first}! Your KarSeva account is ready.`;
+      document.getElementById('successScreen').classList.add('show');
+    } catch (e) {
+      const msgs = { 'auth/email-already-in-use': 'This email is already registered. Try logging in.', 'auth/invalid-email': 'Please enter a valid email address.', 'auth/weak-password': 'Password is too weak. Use at least 6 characters.' };
+      showMsg(msgs[e.code] || 'Something went wrong. Please try again.', 'error');
+    }
+    setLoading('signupBtn', false);
+  };
+
+  window.handleLogin = async () => {
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!email || !password) { showMsg('Please enter your email and password.', 'error'); return; }
+
+    setLoading('loginBtn', true); hideMsg();
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('successMsg').textContent = `Welcome back! Redirecting to your dashboard...`;
+      document.getElementById('successScreen').classList.add('show');
+      setTimeout(() => window.location.href = 'dashboard.html', 1800);
+    } catch (e) {
+      const msgs = { 'auth/user-not-found': 'No account found with this email.', 'auth/wrong-password': 'Incorrect password. Please try again.', 'auth/invalid-credential': 'Invalid email or password.', 'auth/too-many-requests': 'Too many attempts. Please wait a moment.' };
+      showMsg(msgs[e.code] || 'Login failed. Please check your credentials.', 'error');
+    }
+    setLoading('loginBtn', false);
+  };
+
+  window.handleGoogleSignIn = async () => {
+    hideMsg();
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user   = result.user;
+      const nameParts = (user.displayName || 'User').split(' ');
+      await saveUserProfile(user.uid, {
+        firstName: nameParts[0] || '',
+        lastName:  nameParts.slice(1).join(' ') || '',
+        email: user.email,
+        city: '',
+        role: selectedRole,
+        displayName: user.displayName || user.email,
+        photoURL: user.photoURL || '',
+      });
+      document.getElementById('loginForm').style.display  = 'none';
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('successMsg').textContent = `Welcome, ${nameParts[0]}! Your KarSeva account is ready.`;
+      document.getElementById('successScreen').classList.add('show');
+      setTimeout(() => window.location.href = 'dashboard.html', 1800);
+    } catch (e) {
+      showMsg('Google sign-in failed. Please try again.', 'error');
+    }
+  };
+
+  // theme toggle
+  document.getElementById('themeBtn').addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = dark ? 'light' : 'dark';
+
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+
+  localStorage.setItem('ksTheme', next);
+});
+
+  // allow Enter key to submit
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const loginVisible = document.getElementById('loginForm').style.display !== 'none';
+    if (loginVisible) window.handleLogin();
+    else window.handleSignup();
+  });
+</script>
+
+<script>
+/* ── KARSEVA MAGIC DYNAMICS ── */
+(function(){
+  /* ── SCROLL REVEAL ── */
+  const style=document.createElement('style');
+  style.textContent=`
+    .ks-reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal.ks-in{opacity:1;transform:none;}
+    .ks-reveal-l{opacity:0;transform:translateX(-30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-l.ks-in{opacity:1;transform:none;}
+    .ks-reveal-r{opacity:0;transform:translateX(30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-r.ks-in{opacity:1;transform:none;}
+    @keyframes ks-shimmer{0%,100%{opacity:.55}50%{opacity:1}}
+    @keyframes ks-popIn{0%{opacity:0;transform:scale(.85) translateY(16px)}100%{opacity:1;transform:none}}
+    @keyframes ks-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes ks-pulse-ring{0%{box-shadow:0 0 0 0 rgba(0,200,150,.4)}70%{box-shadow:0 0 0 10px rgba(0,200,150,0)}100%{box-shadow:0 0 0 0 rgba(0,200,150,0)}}
+    @keyframes ks-spin{to{transform:rotate(360deg)}}
+    .ks-float{animation:ks-float 3.5s ease-in-out infinite;}
+    .ks-pulse{animation:ks-pulse-ring 2s ease-out infinite;}
+    .ks-pop{animation:ks-popIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+    /* card hover lift */
+    .stat-card,.section-card,.f-card,.task-card,.ngo-card,.badge-item,.lb-table-wrap,.bw-item,.podium-card,.city-card,.tov-card,.auth-box,.form-card,.ai-panel,.post-card,.community-card,.donate-card{transition-property:transform,border-color,box-shadow,background!important;transition-duration:.28s!important;}
+    .stat-card:hover,.section-card:hover,.task-card:hover,.ngo-card:hover,.badge-item:hover,.bw-item:hover,.podium-card:hover,.city-card:hover,.tov-card:hover,.community-card:hover,.donate-card:hover{transform:translateY(-4px)!important;box-shadow:0 12px 32px rgba(0,200,150,.1)!important;}
+    .badge-item:hover .badge-emoji{display:inline-block;animation:ks-float 1.2s ease-in-out infinite;}
+    /* button shimmer */
+    .btn-submit,.btn-hero,.btn-post,.btn-cta1,.btn-match,.match-assign-btn,.btn-dashboard,.em-btn,.ai-rec-action{position:relative;overflow:hidden;}
+    .btn-submit::after,.btn-hero::after,.btn-post::after,.btn-cta1::after,.btn-match::after,.match-assign-btn::after,.btn-dashboard::after,.em-btn::after,.ai-rec-action::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);transform:translateX(-200%);transition:transform .45s;}
+    .btn-submit:hover::after,.btn-hero:hover::after,.btn-post:hover::after,.btn-cta1:hover::after,.btn-match:hover::after,.match-assign-btn:hover::after,.btn-dashboard:hover::after,.em-btn:hover::after,.ai-rec-action:hover::after{transform:translateX(200%);}
+    /* nav item left-bar indicator */
+    .nav-item.active{border-left:3px solid var(--accent);padding-left:9px;transition:all .2s;}
+    /* input focus ring */
+    .form-input:focus,.lb-search:focus{box-shadow:0 0 0 3px rgba(0,200,150,.15)!important;}
+    /* progress bar */
+    #ks-progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:9999;width:0%;transition:width .1s linear;box-shadow:0 0 6px rgba(0,200,150,.6);}
+    /* ripple */
+    .ks-ripple{position:absolute;border-radius:50%;background:rgba(0,200,150,.25);transform:scale(0);animation:ks-rippleAnim .55s linear;pointer-events:none;}
+    @keyframes ks-rippleAnim{to{transform:scale(4);opacity:0;}}
+  `;
+  document.head.appendChild(style);
+
+  /* ── PROGRESS BAR ── */
+  const pb=document.createElement('div');pb.id='ks-progress';document.body.prepend(pb);
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement.scrollHeight-innerHeight;
+    if(h>0) pb.style.width=(scrollY/h*100)+'%';
+  });
+
+  /* ── SCROLL REVEAL OBSERVER ── */
+  // tag eligible elements
+  const selectors=['.stat-card','.section-card','.task-card','.task-item','.lb-row:not(.header)','.badge-item','.bw-item','.podium-card','.city-card','.tov-card','.ngo-card','.f-card','.step-card','.activity-item','.pstat','.match-card','.donate-card','.community-card','.post-card','.ai-rec-card','.form-card','.auth-box','.ai-panel'];
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('ks-in'),i*40);
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:.08});
+  setTimeout(()=>{
+    document.querySelectorAll(selectors.join(',')).forEach((el,i)=>{
+      el.classList.add('ks-reveal');
+      el.style.transitionDelay=(i%6)*0.04+'s';
+      obs.observe(el);
+    });
+  },100);
+
+  /* ── RIPPLE ON BUTTONS ── */
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('button');
+    if(!btn) return;
+    const r=btn.getBoundingClientRect(),sz=Math.max(r.width,r.height);
+    const rip=document.createElement('span');
+    rip.className='ks-ripple';
+    rip.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px`;
+    btn.appendChild(rip);
+    setTimeout(()=>rip.remove(),560);
+    // click sparks
+    for(let i=0;i<8;i++){
+      const s=document.createElement('div');
+      const a=Math.random()*Math.PI*2,d=20+Math.random()*35;
+      s.style.cssText=`position:fixed;pointer-events:none;z-index:9997;width:4px;height:4px;border-radius:50%;background:var(--accent);left:${e.clientX}px;top:${e.clientY}px;transform:translate(-50%,-50%);transition:all .5s cubic-bezier(.1,.8,.2,1)`;
+      document.body.appendChild(s);
+      requestAnimationFrame(()=>{s.style.transform=`translate(${Math.cos(a)*d-2}px,${Math.sin(a)*d-2}px)`;s.style.opacity='0';s.style.width='2px';s.style.height='2px';});
+      setTimeout(()=>s.remove(),510);
+    }
+  });
+
+  /* ── TILT CARDS ── */
+  document.querySelectorAll('.stat-card,.badge-item,.podium-card,.city-card,.f-card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`translateY(-4px) rotateX(${-y*6}deg) rotateY(${x*6}deg)`;
+      card.style.transformStyle='preserve-3d';
+    });
+    card.addEventListener('mouseleave',()=>{card.style.transform='';});
+  });
+
+  /* ── COUNTER ANIMATION ── */
+  function animateCounter(el,target,suffix){
+    let start=null,orig=el.textContent;
+    const fmt=n=>n.toLocaleString()+suffix;
+    const step=ts=>{
+      if(!start)start=ts;
+      const p=Math.min((ts-start)/1400,1),ease=1-Math.pow(1-p,3);
+      el.textContent=fmt(Math.round(ease*target));
+      if(p<1)requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  const cObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const el=e.target;
+      const raw=el.textContent.replace(/,/g,'');
+      const num=parseFloat(raw);
+      const suffix=raw.replace(/[\d.]/g,'').replace(num.toString().replace(/,/g,''),'');
+      if(!isNaN(num)&&num>10)animateCounter(el,num,suffix);
+      cObs.unobserve(el);
+    });
+  },{threshold:.5});
+  document.querySelectorAll('.stat-card-num,.stat-num,.podium-pts,.lb-pts,.lb-pts-val,.yrb-pts,.pstat-num').forEach(el=>cObs.observe(el));
+
+  /* ── SIDEBAR NAV SLIDE ── */
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('mouseenter',()=>{item.style.paddingLeft='16px';});
+    item.addEventListener('mouseleave',()=>{if(!item.classList.contains('active'))item.style.paddingLeft='';});
+  });
+
+  /* ── INPUT FOCUS LABELS ── */
+  document.querySelectorAll('.form-input').forEach(inp=>{
+    inp.addEventListener('focus',()=>{inp.style.background='var(--surface)';});
+    inp.addEventListener('blur',()=>{inp.style.background='';});
+  });
+
+  /* ── THEME TOGGLE SPIN ── */
+  const tBtn=document.getElementById('themeBtn');
+  if(tBtn){
+    tBtn.addEventListener('click',()=>{
+      tBtn.style.transform='rotate(360deg)';
+      tBtn.style.transition='transform .4s cubic-bezier(.34,1.56,.64,1)';
+      setTimeout(()=>{tBtn.style.transform='';},420);
+    });
+  }
+
+  /* ── STAT CARD ACCENT BAR ── */
+  document.querySelectorAll('.stat-card').forEach(c=>{
+    const bar=document.createElement('div');
+    bar.style.cssText='position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);border-radius:0 0 14px 14px;transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.77,0,.18,1);';
+    c.style.position='relative';c.style.overflow='hidden';
+    c.appendChild(bar);
+    c.addEventListener('mouseenter',()=>{bar.style.transform='scaleX(1)';});
+    c.addEventListener('mouseleave',()=>{bar.style.transform='scaleX(0)';});
+  });
+
+  /* ── BADGE FLOAT ON HOVER ── */
+  document.querySelectorAll('.badge-emoji,.pb,.bw-emoji').forEach(em=>{
+    em.addEventListener('mouseenter',()=>{em.style.animation='ks-float 1s ease-in-out infinite';em.style.display='inline-block';});
+    em.addEventListener('mouseleave',()=>{em.style.animation='';});
+  });
+
+  /* ── AVATAR PULSE ON HOVER ── */
+  document.querySelectorAll('.user-av,.lb-av,.ngo-av,.match-av,.podium-av,.yrb-av').forEach(av=>{
+    av.addEventListener('mouseenter',()=>{av.style.animation='ks-pulse-ring 1s ease-out infinite';});
+    av.addEventListener('mouseleave',()=>{av.style.animation='';});
+  });
+
+  /* ── EMERGENCY BANNER ATTENTION SHAKE ── */
+  const em=document.getElementById('emergencyBanner');
+  if(em&&!em.classList.contains('hidden')){
+    const shakeStyle=document.createElement('style');
+    shakeStyle.textContent='@keyframes ks-shake{0%,100%{transform:none}10%,30%,50%,70%,90%{transform:translateX(-4px)}20%,40%,60%,80%{transform:translateX(4px)}}';
+    document.head.appendChild(shakeStyle);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},1200);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},5000);
+  }
+
+  /* ── LB ROW HOVER RANK HIGHLIGHT ── */
+  document.querySelectorAll('.lb-row:not(.header):not(.you)').forEach(row=>{
+    row.addEventListener('mouseenter',()=>{row.style.background='var(--surface2)';row.style.paddingLeft='28px';row.style.transition='all .2s';});
+    row.addEventListener('mouseleave',()=>{row.style.background='';row.style.paddingLeft='';});
+  });
+
+  /* ── PODIUM CROWN FLOAT ── */
+  document.querySelectorAll('.podium-crown').forEach(c=>{
+    c.style.display='inline-block';c.style.animation='ks-float 2.5s ease-in-out infinite';
+    c.style.animationDelay=Math.random()*.8+'s';
+  });
+
+  /* ── BLINK DOT PULSE ── */
+  document.querySelectorAll('.em-dot,.badge-dot,.ai-dot,.tag-dot').forEach(dot=>{
+    dot.style.boxShadow='0 0 0 0 rgba(0,200,150,.4)';
+    dot.style.animation='blink 2s infinite, ks-pulse-ring 2s ease-out infinite';
+  });
+
+  /* ── TASK CARD URGENCY PULSE ── */
+  document.querySelectorAll('.task-status.urgent,.urgency.high').forEach(el=>{
+    el.style.animation='ks-shimmer 1.6s ease-in-out infinite';
+  });
+
+  /* ── PAGE ENTRY FADE ── */
+  document.body.style.opacity='0';
+  document.body.style.transition='opacity .4s ease';
+  window.addEventListener('load',()=>{document.body.style.opacity='1';});
+
+  /* ── SMOOTH LINK TRANSITIONS ── */
+  document.querySelectorAll('[onclick*="location.href"],[onclick*="window.location"]').forEach(el=>{
+    el.addEventListener('click',e=>{
+      e.preventDefault();
+      const match=el.getAttribute('onclick').match(/href='([^']+)'/);
+      if(match){
+        document.body.style.opacity='0';
+        setTimeout(()=>{window.location.href=match[1];},300);
+      }
+    });
+  });
+
+})();
+</script>
+
+<style>
+/* auth-specific: panel stats pop in */
+.pstat{animation:ks-popIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+.pstat:nth-child(1){animation-delay:.1s}
+.pstat:nth-child(2){animation-delay:.22s}
+.pstat:nth-child(3){animation-delay:.34s}
+/* role card hover */
+.role-card{transition:all .25s cubic-bezier(.34,1.2,.64,1)!important;}
+.role-card:hover{transform:translateY(-3px) scale(1.02);}
+.role-card.selected{box-shadow:0 0 0 3px rgba(0,200,150,.2);}
+/* auth box entrance */
+.auth-box{animation:ks-popIn .6s .1s cubic-bezier(.34,1.56,.64,1) both;}
+/* tab transition */
+.auth-tab{transition:all .2s cubic-bezier(.34,1.2,.64,1)!important;}
+/* SVG network pulse */
+.page-deco{animation:ks-shimmer 4s ease-in-out infinite;}
+/* left panel title entrance */
+.panel-title{animation:ks-reveal-up .8s .05s cubic-bezier(.34,1.2,.64,1) both;}
+.panel-sub{animation:ks-reveal-up .8s .15s cubic-bezier(.34,1.2,.64,1) both;}
+@keyframes ks-reveal-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+/* google btn hover */
+.btn-google{transition:all .2s!important;position:relative;overflow:hidden;}
+.btn-google:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,200,150,.12);}
+/* input glow */
+.form-input:focus{box-shadow:0 0 0 3px rgba(0,200,150,.15),0 0 8px rgba(0,200,150,.08)!important;}
+</style>
+<script>
+/* auth extra magic */
+/* animate SVG dashed lines offset */
+(function(){
+  const svg=document.querySelector('.page-deco');
+  if(!svg)return;
+  let off=0;
+  svg.querySelectorAll('line').forEach(l=>{
+    l.style.transition='stroke-dashoffset .1s linear';
+  });
+  setInterval(()=>{
+    off=(off+0.5)%20;
+    svg.querySelectorAll('line').forEach(l=>{
+      l.style.strokeDashoffset=off;
+    });
+  },40);
+})();
+/* shake input on failed submit */
+const origErr=window.showMsg||null;
+document.querySelectorAll('.form-input').forEach(inp=>{
+  inp.addEventListener('invalid',()=>{
+    inp.style.animation='ks-shake .3s ease';
+    setTimeout(()=>{inp.style.animation='';},320);
+  });
+});
+/* role card click pop */
+document.querySelectorAll('.role-card').forEach(c=>{
+  c.addEventListener('click',()=>{
+    c.style.transform='scale(.96)';
+    setTimeout(()=>{c.style.transform='';},150);
+  });
+});
+</script>
+</body>
+</html>

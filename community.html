@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <script>
+  (function(){
+    const t = localStorage.getItem('ksTheme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KarSeva — Community</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+    [data-theme="dark"]{
+      --bg:#0A0F0D;--surface:#111714;--surface2:#182018;--border:#1E2B22;
+      --accent:#00C896;--accent-dim:rgba(0,200,150,.12);--accent-border:rgba(0,200,150,.28);
+      --text:#F0FFF8;--muted:#7A9E8A;--danger:#EF4444;--danger-dim:rgba(239,68,68,.1);
+      --warning:#F5A623;
+    }
+    [data-theme="light"]{
+      --bg:#F2FCF7;--surface:#FFFFFF;--surface2:#E8F5EE;--border:#C8E6D6;
+      --accent:#009E72;--accent-dim:rgba(0,158,114,.10);--accent-border:rgba(0,158,114,.32);
+      --text:#071A0F;--muted:#3D7A58;--danger:#DC2626;--danger-dim:rgba(220,38,38,.08);
+      --warning:#D97706;
+    }
+
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;transition:background .35s,color .35s;}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;z-index:100;transition:background .35s;}
+    .sidebar-logo{font-size:20px;font-weight:800;letter-spacing:-.02em;padding:0 12px;margin-bottom:32px;}
+    .sidebar-logo span{color:var(--accent);}
+    .nav-section-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 12px;margin-bottom:8px;margin-top:20px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .2s,color .2s;margin-bottom:2px;}
+    .nav-item:hover{background:var(--surface2);color:var(--text);}
+    .nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:700;}
+    .nav-icon{font-size:17px;width:20px;text-align:center;}
+    .sidebar-bottom{margin-top:auto;}
+    .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);}
+    .user-av{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .user-name{font-size:13px;font-weight:700;}
+    .user-role{font-size:11px;color:var(--muted);}
+
+    /* MAIN */
+    .main{margin-left:240px;padding:32px;min-height:100vh;}
+
+    /* TOPBAR */
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+    .topbar h1{font-size:22px;font-weight:800;letter-spacing:-.01em;}
+    .topbar p{font-size:14px;color:var(--muted);margin-top:2px;}
+    .theme-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+    .theme-toggle:hover{border-color:var(--accent);}
+
+    /* TABS */
+    .tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;width:fit-content;margin-bottom:28px;}
+    .tab{padding:8px 18px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:background .2s,color .2s;}
+    .tab.active{background:var(--accent);color:#0A0F0D;}
+
+    /* SECTION CARD */
+    .section-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;transition:background .35s;}
+    .sc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .sc-title{font-size:16px;font-weight:800;}
+    .sc-link{font-size:13px;color:var(--accent);font-weight:600;cursor:pointer;}
+
+    /* POST COMPOSER */
+    .composer{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;transition:background .35s;}
+    .composer-top{display:flex;gap:12px;margin-bottom:14px;}
+    .composer-av{width:38px;height:38px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .composer-input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;resize:none;outline:none;min-height:80px;transition:border-color .2s;}
+    .composer-input:focus{border-color:var(--accent);}
+    .composer-input::placeholder{color:var(--muted);}
+    .composer-actions{display:flex;align-items:center;justify-content:space-between;}
+    .composer-btns{display:flex;gap:8px;}
+    .composer-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:border-color .2s,color .2s;}
+    .composer-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .btn-post-submit{padding:9px 20px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;transition:opacity .2s;}
+    .btn-post-submit:hover{opacity:.88;}
+
+    /* FEED POSTS */
+    .post-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:14px;transition:background .35s,border-color .2s;}
+    .post-card:hover{border-color:var(--accent);}
+    .post-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+    .post-av{width:38px;height:38px;border-radius:9px;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .post-author{font-size:14px;font-weight:700;}
+    .post-meta{font-size:12px;color:var(--muted);}
+    .post-body{font-size:14px;line-height:1.7;color:var(--text);margin-bottom:14px;}
+    .post-img{width:100%;border-radius:12px;margin-bottom:14px;max-height:300px;object-fit:cover;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);}
+    .post-tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);margin-bottom:12px;}
+    .post-footer{display:flex;align-items:center;gap:16px;border-top:1px solid var(--border);padding-top:14px;}
+    .post-action{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;padding:5px 10px;border-radius:7px;transition:background .2s,color .2s;border:none;background:transparent;font-family:'Inter',sans-serif;font-weight:500;}
+    .post-action:hover{background:var(--surface2);color:var(--accent);}
+    .post-action.liked{color:var(--danger);}
+
+    /* GROUPS */
+    .groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+    .group-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color .2s,transform .2s;}
+    .group-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+    .group-emoji{font-size:28px;margin-bottom:10px;}
+    .group-name{font-size:15px;font-weight:800;margin-bottom:4px;}
+    .group-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;}
+    .group-meta{display:flex;align-items:center;justify-content:space-between;}
+    .group-members{font-size:12px;color:var(--muted);}
+    .group-members b{color:var(--accent);}
+    .btn-join{padding:7px 16px;border-radius:8px;background:var(--accent);color:#0A0F0D;font-size:12px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;transition:opacity .2s;}
+    .btn-join:hover{opacity:.88;}
+    .btn-join.joined{background:var(--surface);color:var(--muted);border:1px solid var(--border);cursor:default;}
+
+    /* UPDATES */
+    .update-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);}
+    .update-item:last-child{border-bottom:none;padding-bottom:0;}
+    .update-icon{width:40px;height:40px;border-radius:10px;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .update-ngo{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:2px;}
+    .update-title{font-size:14px;font-weight:700;margin-bottom:3px;}
+    .update-body{font-size:13px;color:var(--muted);line-height:1.5;}
+    .update-time{font-size:11px;color:var(--muted);margin-top:4px;}
+
+    /* PHOTO WALL */
+    .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+    .photo-item{border-radius:12px;overflow:hidden;position:relative;cursor:pointer;background:var(--surface2);border:1px solid var(--border);}
+    .photo-item:hover .photo-overlay{opacity:1;}
+    .photo-placeholder{height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:28px;}
+    .photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;padding:10px;opacity:0;transition:opacity .2s;}
+    .photo-caption{font-size:11px;font-weight:700;color:#fff;}
+
+    /* COMMENTS */
+    .comments-section{display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:4px;}
+    .comments-section.open{display:block;}
+    .comment-item{display:flex;gap:10px;margin-bottom:12px;}
+    .comment-av{width:28px;height:28px;border-radius:7px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--accent);color:#0A0F0D;}
+    .comment-bubble{background:var(--surface2);border-radius:10px;padding:8px 12px;flex:1;}
+    .comment-author{font-size:12px;font-weight:700;margin-bottom:2px;}
+    .comment-text{font-size:13px;color:var(--text);line-height:1.5;}
+    .comment-time{font-size:11px;color:var(--muted);margin-top:3px;}
+    .comment-composer{display:flex;gap:8px;margin-top:10px;}
+    .comment-input{flex:1;padding:9px 12px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+    .comment-input:focus{border-color:var(--accent);}
+    .comment-input::placeholder{color:var(--muted);}
+    .btn-comment-send{padding:9px 16px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;white-space:nowrap;}
+    .btn-comment-send:hover{opacity:.88;}
+
+    /* SHARE TOAST */
+    .share-toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--accent-border);border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;color:var(--accent);z-index:999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+    .share-toast.show{display:block;animation:fadeInUp .2s ease;}
+    @keyframes fadeInUp{from{opacity:0;transform:translate(-50%,8px);}to{opacity:1;transform:translate(-50%,0);}}
+
+    /* GROUP FILTER BAR */
+    .group-filter-bar{display:none;align-items:center;gap:12px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:12px;padding:10px 16px;margin-bottom:16px;}
+    .group-filter-bar.show{display:flex;}
+    .gfb-label{font-size:14px;font-weight:700;color:var(--accent);flex:1;}
+    .btn-clear-filter{padding:6px 14px;border-radius:8px;border:1px solid var(--accent-border);background:transparent;color:var(--accent);font-size:12px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:background .2s;}
+    .btn-clear-filter:hover{background:var(--accent);color:#0A0F0D;}
+    .help-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;transition:border-color .2s;}
+    .help-card:hover{border-color:var(--accent);}
+    .help-card.urgent{border-left:3px solid var(--danger);}
+    .help-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+    .help-tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;}
+    .help-tag.urgent{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,.3);}
+    .help-tag.general{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+    .help-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+    .help-body{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:12px;}
+    .help-footer{display:flex;align-items:center;justify-content:space-between;}
+    .help-poster{font-size:12px;color:var(--muted);}
+    .btn-respond{padding:7px 16px;border-radius:8px;background:var(--accent);color:#0A0F0D;font-size:12px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;}
+    .btn-respond:hover{opacity:.88;}
+
+    @media(max-width:900px){
+      .sidebar{display:none;}
+      .main{margin-left:0;padding:20px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">Kar<span>Seva</span></div>
+  <div class="nav-section-label">Main</div>
+  <div class="nav-item" onclick="location.href='dashboard.html'"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="location.href='tasks.html'"><span class="nav-icon">✅</span> Tasks</div>
+  <div class="nav-item active"><span class="nav-icon">👥</span> Community</div>
+  <div class="nav-item" onclick="location.href='leaderboard.html'"><span class="nav-icon">🏅</span> Leaderboard</div>
+  <div class="nav-item" onclick="location.href='donate.html'"><span class="nav-icon">❤️</span> Donate</div>
+  <div class="nav-item" id="adminNav" style="display:none;" onclick="location.href='admin.html'"><span class="nav-icon">🧠</span> Admin Panel</div>
+  <div class="nav-section-label">Account</div>
+  <div class="nav-item"><span class="nav-icon">👤</span> My Profile</div>
+  <div class="nav-item" onclick="location.href='settings.html'"><span class="nav-icon">⚙️</span> Settings</div>
+  <div class="nav-item" id="myNgoTab" style="display:none;" onclick="location.href='ngoprofile.html'">
+  <span class="nav-icon">🏛️</span> My NGO
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-av" id="sidebarAv">--</div>
+      <div>
+        <div class="user-name" id="sidebarName">Loading...</div>
+        <div class="user-role" id="sidebarRole">Volunteer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>👥 Community</h1>
+      <p>Connect, share and inspire fellow volunteers</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn">🌙</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" id="tab-feed"    onclick="switchTab('feed')">📰 Feed</button>
+    <button class="tab"        id="tab-groups"  onclick="switchTab('groups')">👥 Groups</button>
+    <button class="tab"        id="tab-photos"  onclick="switchTab('photos')">📸 Photo Wall</button>
+    <button class="tab"        id="tab-updates" onclick="switchTab('updates')">📢 Daily Updates</button>
+    <button class="tab"        id="tab-help"    onclick="switchTab('help')">🆘 Need Help</button>
+  </div>
+
+  <!-- SHARE TOAST -->
+  <div class="share-toast" id="shareToast">✅ Link copied to clipboard!</div>
+
+  <!-- ALL TABS WRAPPER -->
+  <div id="tabsWrapper">
+
+  <!-- FEED TAB -->
+  <div id="feedTab" style="display:block;">
+    <!-- GROUP FILTER BAR -->
+    <div class="group-filter-bar" id="groupFilterBar">
+      <span class="gfb-label" id="groupFilterLabel">Showing group posts</span>
+      <button class="btn-clear-filter" onclick="clearGroupFilter()">✕ Show All Posts</button>
+    </div>
+    <!-- COMPOSER -->
+    <div class="composer">
+      <div class="composer-top">
+        <div class="composer-av" id="composerAv">--</div>
+        <textarea class="composer-input" id="postInput" placeholder="Share an update, story or inspiration with the KarSeva community..."></textarea>
+      </div>
+      <div class="composer-actions">
+        <div class="composer-btns">
+          <button class="composer-btn">📸 Photo</button>
+          <button class="composer-btn">🏷️ Tag NGO</button>
+          <button class="composer-btn">📍 Location</button>
+        </div>
+        <button class="btn-post-submit" onclick="submitPost()">Post →</button>
+      </div>
+    </div>
+
+    <!-- POSTS FEED -->
+    <div id="feedPosts">
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-av" style="background:#F5A623;color:#0A0F0D;">NK</div>
+          <div>
+            <div class="post-author">Neha Kapoor</div>
+            <div class="post-meta">Delhi · 2 hours ago</div>
+          </div>
+        </div>
+        <span class="post-tag">🏥 Medical Camp</span>
+        <div class="post-body">Just finished a 6-hour medical camp in South Delhi with HelpFirst NGO. We treated 180 patients today — many of them children who hadn't seen a doctor in years. This is why we volunteer. Every single person matters. 💚</div>
+        <div class="post-footer">
+          <button class="post-action" onclick="toggleLike(this)">❤️ 48 Likes</button>
+          <button class="post-action" onclick="toggleComments(this,'comments1')">💬 12 Comments</button>
+          <button class="post-action" onclick="sharePost(this,'Neha Kapoor shared a field update on KarSeva')">↗️ Share</button>
+        </div>
+        <div class="comments-section" id="comments1">
+          <div class="comment-item">
+            <div class="comment-av" style="background:#7C5CFF;color:#fff;">PS</div>
+            <div class="comment-bubble"><div class="comment-author">Priya Sharma</div><div class="comment-text">This is incredible Neha! 180 patients in one day is amazing work 💚</div><div class="comment-time">1 hour ago</div></div>
+          </div>
+          <div class="comment-item">
+            <div class="comment-av" style="background:#00C896;color:#0A0F0D;">RK</div>
+            <div class="comment-bubble"><div class="comment-author">Ravi Kumar</div><div class="comment-text">Inspiring! I want to join the next medical camp. How do I sign up?</div><div class="comment-time">45 min ago</div></div>
+          </div>
+          <div class="comment-composer">
+            <input class="comment-input" type="text" placeholder="Write a comment..." id="cinput1"/>
+            <button class="btn-comment-send" onclick="addComment('comments1','cinput1','💬 12 Comments',this)">Post</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-av" style="background:#7C5CFF;color:#fff;">PS</div>
+          <div>
+            <div class="post-author">Priya Sharma</div>
+            <div class="post-meta">Bhopal · 5 hours ago</div>
+          </div>
+        </div>
+        <span class="post-tag">📚 Education</span>
+        <div class="post-body">Week 3 of teaching at Seva Sangam's community school in Bhopal. Today one of my students, 9-year-old Aarav, solved a multiplication problem on his own for the first time. The look on his face was everything. 📖✨</div>
+        <div class="post-footer">
+          <button class="post-action" onclick="toggleLike(this)">❤️ 62 Likes</button>
+          <button class="post-action" onclick="toggleComments(this,'comments2')">💬 19 Comments</button>
+          <button class="post-action" onclick="sharePost(this,'Priya Sharma shared a story on KarSeva')">↗️ Share</button>
+        </div>
+        <div class="comments-section" id="comments2">
+          <div class="comment-item">
+            <div class="comment-av" style="background:#F5A623;color:#0A0F0D;">NK</div>
+            <div class="comment-bubble"><div class="comment-author">Neha Kapoor</div><div class="comment-text">Aarav sounds like a star student! Teaching is one of the most powerful forms of seva 🙏</div><div class="comment-time">3 hours ago</div></div>
+          </div>
+          <div class="comment-composer">
+            <input class="comment-input" type="text" placeholder="Write a comment..." id="cinput2"/>
+            <button class="btn-comment-send" onclick="addComment('comments2','cinput2','💬 19 Comments',this)">Post</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-av" style="background:#00C896;color:#0A0F0D;">RK</div>
+          <div>
+            <div class="post-author">Ravi Kumar</div>
+            <div class="post-meta">Indore · Yesterday</div>
+          </div>
+        </div>
+        <span class="post-tag">🌱 Environment</span>
+        <div class="post-body">Planted 200 trees today with the Green Roots team near Indore. Small action, massive impact over time. If every volunteer plants just 10 trees a year, imagine what we can do together. 🌳 Who else is joining the next drive on Saturday?</div>
+        <div class="post-footer">
+          <button class="post-action" onclick="toggleLike(this)">❤️ 34 Likes</button>
+          <button class="post-action" onclick="toggleComments(this,'comments3')">💬 8 Comments</button>
+          <button class="post-action" onclick="sharePost(this,'Ravi Kumar shared a field update on KarSeva')">↗️ Share</button>
+        </div>
+        <div class="comments-section" id="comments3">
+          <div class="comment-item">
+            <div class="comment-av" style="background:#E65C00;color:#fff;">AM</div>
+            <div class="comment-bubble"><div class="comment-author">Arjun Mehta</div><div class="comment-text">I'm in for Saturday! What time and where do we meet?</div><div class="comment-time">Yesterday</div></div>
+          </div>
+          <div class="comment-composer">
+            <input class="comment-input" type="text" placeholder="Write a comment..." id="cinput3"/>
+            <button class="btn-comment-send" onclick="addComment('comments3','cinput3','💬 8 Comments',this)">Post</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUPS TAB -->
+  <div id="groupsTab" style="display:none;">
+    <div class="section-card">
+      <div class="sc-header">
+        <div class="sc-title">Your Groups</div>
+        <button onclick="createGroup()" style="padding:8px 16px;border-radius:8px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;font-family:Inter,sans-serif;border:none;cursor:pointer;">+ Create Group</button>
+      </div>
+      <div class="groups-grid">
+        <div class="group-card" onclick="filterByGroup('🏥 Indore Medical Volunteers')">
+          <div class="group-emoji">🏥</div>
+          <div class="group-name">Indore Medical Volunteers</div>
+          <div class="group-desc">First responders and medical volunteers covering Indore and surrounding districts for emergency health camps.</div>
+          <div class="group-meta"><div class="group-members"><b>142</b> members</div><button class="btn-join joined" onclick="event.stopPropagation()">✅ Joined</button></div>
+        </div>
+        <div class="group-card" onclick="filterByGroup('📚 Bhopal Education Circle')">
+          <div class="group-emoji">📚</div>
+          <div class="group-name">Bhopal Education Circle</div>
+          <div class="group-desc">Teachers, tutors and education volunteers working with underprivileged children across Bhopal.</div>
+          <div class="group-meta"><div class="group-members"><b>89</b> members</div><button class="btn-join" onclick="event.stopPropagation();joinGroup(this)">Join →</button></div>
+        </div>
+        <div class="group-card" onclick="filterByGroup('🌱 Green Warriors MP')">
+          <div class="group-emoji">🌱</div>
+          <div class="group-name">Green Warriors MP</div>
+          <div class="group-desc">Environment volunteers focused on tree plantation, waste management and river clean-ups across Madhya Pradesh.</div>
+          <div class="group-meta"><div class="group-members"><b>210</b> members</div><button class="btn-join" onclick="event.stopPropagation();joinGroup(this)">Join →</button></div>
+        </div>
+        <div class="group-card" onclick="filterByGroup('🍳 Community Kitchen Network')">
+          <div class="group-emoji">🍳</div>
+          <div class="group-name">Community Kitchen Network</div>
+          <div class="group-desc">Volunteers who cook and distribute meals to homeless, elderly and disaster-affected communities.</div>
+          <div class="group-meta"><div class="group-members"><b>67</b> members</div><button class="btn-join" onclick="event.stopPropagation();joinGroup(this)">Join →</button></div>
+        </div>
+        <div class="group-card" onclick="filterByGroup('🚨 Rapid Response Team India')">
+          <div class="group-emoji">🚨</div>
+          <div class="group-name">Rapid Response Team India</div>
+          <div class="group-desc">Elite volunteers who respond to emergencies within 2 hours. Requires at least 5 completed tasks to join.</div>
+          <div class="group-meta"><div class="group-members"><b>48</b> members</div><button class="btn-join" onclick="event.stopPropagation();joinGroup(this)">Join →</button></div>
+        </div>
+        <div class="group-card" onclick="filterByGroup('💻 Tech for Good India')">
+          <div class="group-emoji">💻</div>
+          <div class="group-name">Tech for Good India</div>
+          <div class="group-desc">Tech volunteers building digital solutions for NGOs — websites, apps, data tools and digital literacy programs.</div>
+          <div class="group-meta"><div class="group-members"><b>93</b> members</div><button class="btn-join" onclick="event.stopPropagation();joinGroup(this)">Join →</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHOTO WALL TAB -->
+  <div id="photosTab" style="display:none;">
+    <div class="section-card">
+      <div class="sc-header">
+        <div class="sc-title">📸 Field Photos</div>
+        <button onclick="uploadPhoto()" style="padding:8px 16px;border-radius:8px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;font-family:Inter,sans-serif;border:none;cursor:pointer;">+ Upload Photo</button>
+      </div>
+      <div class="photo-grid">
+        <div class="photo-item">
+          <div class="photo-placeholder" style="background:rgba(0,200,150,.08);">🏥<span style="font-size:11px;color:var(--muted);">Medical Camp · Indore</span></div>
+          <div class="photo-overlay"><span class="photo-caption">Medical Camp · Neha K.</span></div>
+        </div>
+        <div class="photo-item">
+          <div class="photo-placeholder" style="background:rgba(124,92,255,.08);">📚<span style="font-size:11px;color:var(--muted);">School · Bhopal</span></div>
+          <div class="photo-overlay"><span class="photo-caption">Community School · Priya S.</span></div>
+        </div>
+        <div class="photo-item">
+          <div class="photo-placeholder" style="background:rgba(99,184,34,.08);">🌱<span style="font-size:11px;color:var(--muted);">Tree Drive · Indore</span></div>
+          <div class="photo-overlay"><span class="photo-caption">Tree Plantation · Ravi K.</span></div>
+        </div>
+        <div class="photo-item">
+          <div class="photo-placeholder" style="background:rgba(245,166,35,.08);">🍳<span style="font-size:11px;color:var(--muted);">Food Drive · Mumbai</span></div>
+          <div class="photo-overlay"><span class="photo-caption">Food Distribution · Ananya S.</span></div>
+        </div>
+        <div class="photo-item">
+          <div class="photo-placeholder" style="background:rgba(239,68,68,.08);">🚨<span style="font-size:11px;color:var(--muted);">Flood Relief · Pune</span></div>
+          <div class="photo-overlay"><span class="photo-caption">Flood Relief · Sneha P.</span></div>
+        </div>
+        <div class="photo-item">
+          <div class="photo-placeholder" style="background:rgba(0,168,232,.08);">💻<span style="font-size:11px;color:var(--muted);">Digital Camp · Delhi</span></div>
+          <div class="photo-overlay"><span class="photo-caption">Digital Literacy · Vikram D.</span></div>
+        </div>
+        <div class="photo-item">
+          <div class="photo-placeholder" style="background:rgba(205,127,50,.08);">🧱<span style="font-size:11px;color:var(--muted);">Shelter Build · Bhopal</span></div>
+          <div class="photo-overlay"><span class="photo-caption">Shelter Build · Rahul V.</span></div>
+        </div>
+        <div class="photo-item">
+          <div class="photo-placeholder" style="background:rgba(236,72,153,.08);">👩<span style="font-size:11px;color:var(--muted);">Women Safety · Mumbai</span></div>
+          <div class="photo-overlay"><span class="photo-caption">Women's Camp · Raftaar P.</span></div>
+        </div>
+        <div class="photo-item">
+          <div class="photo-placeholder" style="background:rgba(245,166,35,.08);">🎨<span style="font-size:11px;color:var(--muted);">Art Workshop · Pune</span></div>
+          <div class="photo-overlay"><span class="photo-caption">Art for Kids · Meera J.</span></div>
+        </div>
+        <div class="photo-item" style="cursor:pointer;border:2px dashed var(--border);" onclick="uploadPhoto()">
+          <div class="photo-placeholder">➕<span style="font-size:12px;color:var(--muted);">Add your photo</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAILY UPDATES TAB -->
+  <div id="updatesTab" style="display:none;">
+    <div class="section-card">
+      <div class="sc-header">
+        <div class="sc-title">📢 NGO Daily Updates</div>
+      </div>
+      <div class="update-item">
+        <div class="update-icon">🏥</div>
+        <div>
+          <div class="update-ngo">HelpFirst India</div>
+          <div class="update-title">Medical camp treated 180 patients today</div>
+          <div class="update-body">Our Indore medical camp successfully treated 180 patients including 60 children. Special thanks to all 12 volunteers who showed up. Next camp is Saturday at Gandhi Nagar.</div>
+          <div class="update-time">2 hours ago · Indore</div>
+        </div>
+      </div>
+      <div class="update-item">
+        <div class="update-icon">📚</div>
+        <div>
+          <div class="update-ngo">Seva Sangam</div>
+          <div class="update-title">New batch of 40 students enrolled</div>
+          <div class="update-body">We've enrolled 40 new students in our community school program starting Monday. We urgently need 4 more volunteer teachers for the morning slot 9am–12pm.</div>
+          <div class="update-time">4 hours ago · Bhopal</div>
+        </div>
+      </div>
+      <div class="update-item">
+        <div class="update-icon">🌱</div>
+        <div>
+          <div class="update-ngo">Green Roots</div>
+          <div class="update-title">500 trees planted this week!</div>
+          <div class="update-body">We crossed our weekly target of 500 saplings! 28 volunteers participated across 3 sites. Our monthly target is 2000 — we're at 1,340. Join Saturday's drive!</div>
+          <div class="update-time">Yesterday · Pune</div>
+        </div>
+      </div>
+      <div class="update-item">
+        <div class="update-icon">🍳</div>
+        <div>
+          <div class="update-ngo">Raftaar Parivar</div>
+          <div class="update-title">1,200 meals distributed in flood areas</div>
+          <div class="update-body">Our teams distributed 1,200 hot meals to flood-displaced families across Dharavi today. Donations and volunteer support has been incredible. Thank you all!</div>
+          <div class="update-time">Yesterday · Mumbai</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEED HELP TAB -->
+  <div id="helpTab" style="display:none;">
+    <div class="section-card">
+      <div class="sc-header">
+        <div class="sc-title">🆘 Help Requests</div>
+        <button onclick="postHelp()" style="padding:8px 16px;border-radius:8px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;font-family:Inter,sans-serif;border:none;cursor:pointer;">+ Post Request</button>
+      </div>
+      <div class="help-card urgent">
+        <div class="help-header"><span class="help-tag urgent">🔴 Urgent</span></div>
+        <div class="help-title">Need 3 medical volunteers in Indore — TODAY</div>
+        <div class="help-body">Emergency flood camp running short of first aid volunteers. Location: Gandhi Nagar Relief Camp, Indore. Report by 2pm. Food and transport provided.</div>
+        <div class="help-footer">
+          <div class="help-poster">Posted by HelpFirst India · 1h ago</div>
+          <button class="btn-respond" onclick="respond(this)">Respond →</button>
+        </div>
+      </div>
+      <div class="help-card">
+        <div class="help-header"><span class="help-tag general">📚 Education</span></div>
+        <div class="help-title">Looking for Maths teacher volunteer — Bhopal</div>
+        <div class="help-body">Seva Sangam needs a volunteer who can teach basic maths (class 5–7 level) on weekends 10am–1pm. Commitment of at least 4 Saturdays required.</div>
+        <div class="help-footer">
+          <div class="help-poster">Posted by Seva Sangam · 3h ago</div>
+          <button class="btn-respond" onclick="respond(this)">Respond →</button>
+        </div>
+      </div>
+      <div class="help-card">
+        <div class="help-header"><span class="help-tag general">🚗 Logistics</span></div>
+        <div class="help-title">Need volunteer with vehicle — Pune to Mumbai</div>
+        <div class="help-body">Need to transport 200kg of relief material from our Pune warehouse to Mumbai distribution point this Sunday. Fuel costs reimbursed.</div>
+        <div class="help-footer">
+          <div class="help-poster">Posted by Raftaar Parivar · Yesterday</div>
+          <button class="btn-respond" onclick="respond(this)">Respond →</button>
+        </div>
+      </div>
+      <div class="help-card">
+        <div class="help-header"><span class="help-tag general">🌱 Environment</span></div>
+        <div class="help-title">10 volunteers needed for river clean-up — Indore</div>
+        <div class="help-body">Green Warriors MP is organising a Saraswati river clean-up this Sunday 7am–11am. Gloves and tools provided. Great for first-time volunteers!</div>
+        <div class="help-footer">
+          <div class="help-poster">Posted by Green Warriors MP · 2h ago</div>
+          <button class="btn-respond" onclick="respond(this)">Respond →</button>
+        </div>
+      </div>
+      <div class="help-card">
+        <div class="help-header"><span class="help-tag general">🍳 Food</span></div>
+        <div class="help-title">Cooks needed for community kitchen — Bhopal</div>
+        <div class="help-body">Community Kitchen Network needs 3 volunteers who can cook for 100+ people this Saturday. Experience with large-scale cooking preferred. 6am–2pm shift.</div>
+        <div class="help-footer">
+          <div class="help-poster">Posted by Community Kitchen Network · 5h ago</div>
+          <button class="btn-respond" onclick="respond(this)">Respond →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end tabsWrapper -->
+
+</div><!-- end main -->
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBM1zpNgjrztamRcvRJlJZxZhUrHqx6xTo",
+    authDomain: "karseva-1fb4f.firebaseapp.com",
+    projectId: "karseva-1fb4f",
+    storageBucket: "karseva-1fb4f.firebasestorage.app",
+    messagingSenderId: "4741841467",
+    appId: "1:4741841467:web:780939d385e60af936521e"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  let currentProfile = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'auth.html'; return; }
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    currentProfile = snap.exists() ? snap.data() : {};
+    const p = currentProfile;
+    const initials = ((p.firstName||'U')[0]+(p.lastName||'')[0]).toUpperCase();
+    document.getElementById('sidebarAv').textContent   = initials;
+    document.getElementById('composerAv').textContent  = initials;
+    document.getElementById('sidebarName').textContent = `${p.firstName||''} ${p.lastName||''}`.trim();
+    document.getElementById('sidebarRole').textContent = p.role === 'ngo' ? 'NGO Admin' : 'Volunteer';
+    if (p.role === 'ngo') document.getElementById('adminNav').style.display = 'flex';
+    const ngoTab = document.getElementById('myNgoTab');
+    if (ngoTab) ngoTab.style.display = p.role === 'ngo' ? 'flex' : 'none';
+  });
+
+  // TAB SWITCH
+  window.switchTab = (tab) => {
+    ['feed','groups','photos','updates','help'].forEach(t => {
+      const el = document.getElementById(t+'Tab');
+      if (t === tab) {
+        el.style.cssText = 'display:block;';
+      } else {
+        el.style.cssText = 'display:none;height:0;overflow:hidden;margin:0;padding:0;';
+      }
+      document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+    });
+  };
+
+  // SUBMIT POST
+  window.submitPost = async () => {
+    const text = document.getElementById('postInput').value.trim();
+    if (!text) return;
+    const p = currentProfile || {};
+    const initials = ((p.firstName||'U')[0]+(p.lastName||'')[0]).toUpperCase();
+    const colors = ['#00C896','#7C5CFF','#F5A623','#E65C00'];
+    const color  = colors[Math.floor(Math.random()*colors.length)];
+
+    const postId = 'comments_' + Date.now();
+    const newPost = document.createElement('div');
+    newPost.className = 'post-card';
+    newPost.style.borderColor = 'var(--accent)';
+    newPost.innerHTML = `
+      <div class="post-header">
+        <div class="post-av" style="background:${color};color:#0A0F0D;">${initials}</div>
+        <div>
+          <div class="post-author">${p.firstName||'You'} ${p.lastName||''} <span style="font-size:11px;background:var(--accent);color:#0A0F0D;padding:2px 7px;border-radius:99px;">You</span></div>
+          <div class="post-meta">${p.city||'India'} · Just now</div>
+        </div>
+      </div>
+      <div class="post-body">${text}</div>
+      <div class="post-footer">
+        <button class="post-action" onclick="toggleLike(this)">❤️ 0 Likes</button>
+        <button class="post-action" onclick="toggleComments(this,'${postId}')">💬 0 Comments</button>
+        <button class="post-action" onclick="sharePost(this,'${p.firstName} shared a post on KarSeva')">↗️ Share</button>
+      </div>
+      <div class="comments-section" id="${postId}">
+        <div class="comment-composer">
+          <input class="comment-input" type="text" placeholder="Write a comment..." id="cinput_${postId}"/>
+          <button class="btn-comment-send" onclick="addComment('${postId}','cinput_${postId}','💬 0 Comments',this)">Post</button>
+        </div>
+      </div>`;
+
+    const feed = document.getElementById('feedPosts');
+    feed.insertBefore(newPost, feed.firstChild);
+    document.getElementById('postInput').value = '';
+
+    // save to Firebase
+    try {
+      await addDoc(collection(db, 'posts'), {
+        text, author: `${p.firstName||''} ${p.lastName||''}`.trim(),
+        city: p.city||'', createdAt: serverTimestamp()
+      });
+    } catch(e) { console.log('Post saved locally only'); }
+  };
+
+  // TOGGLE COMMENTS
+  window.toggleComments = (btn, sectionId) => {
+    const section = document.getElementById(sectionId);
+    const isOpen  = section.classList.contains('open');
+    section.classList.toggle('open');
+    const match = btn.textContent.match(/\d+/);
+    const count = match ? match[0] : '0';
+    btn.textContent = isOpen ? `💬 ${count} Comments` : `💬 ${count} Comments ▲`;
+    if (!isOpen) section.querySelector('.comment-input')?.focus();
+  };
+
+  // ADD COMMENT
+  window.addComment = (sectionId, inputId, originalBtnText, sendBtn) => {
+    const input   = document.getElementById(inputId);
+    const text    = input.value.trim();
+    if (!text) return;
+    const p       = currentProfile || {};
+    const initials= ((p.firstName||'U')[0]+(p.lastName||'')[0]).toUpperCase();
+    const colors  = ['#00C896','#7C5CFF','#F5A623','#E65C00','#00A8E8'];
+    const color   = colors[Math.floor(Math.random()*colors.length)];
+    const section = document.getElementById(sectionId);
+    const composer= section.querySelector('.comment-composer');
+
+    const item = document.createElement('div');
+    item.className = 'comment-item';
+    item.innerHTML = `
+      <div class="comment-av" style="background:${color};color:#0A0F0D;">${initials}</div>
+      <div class="comment-bubble">
+        <div class="comment-author">${p.firstName||'You'} ${p.lastName||''}</div>
+        <div class="comment-text">${text}</div>
+        <div class="comment-time">Just now</div>
+      </div>`;
+    section.insertBefore(item, composer);
+    input.value = '';
+
+    // update comment count on button
+    const footer = section.previousElementSibling;
+    const commentBtn = footer?.querySelector('[onclick*="toggleComments"]');
+    if (commentBtn) {
+      const match = commentBtn.textContent.match(/\d+/);
+      const count = match ? parseInt(match[1]) + 1 : 1;
+      commentBtn.textContent = `💬 ${count} Comments ▲`;
+    }
+  };
+
+  // SHARE POST
+  window.sharePost = (btn, text) => {
+    const url = `${window.location.origin}/community.html`;
+    navigator.clipboard.writeText(url).catch(() => {});
+    const toast = document.getElementById('shareToast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  };
+
+  // GROUP FILTER
+  window.filterByGroup = (groupName) => {
+    switchTab('feed');
+    const bar   = document.getElementById('groupFilterBar');
+    const label = document.getElementById('groupFilterLabel');
+    bar.classList.add('show');
+    label.textContent = `Showing: ${groupName}`;
+    // hide posts that don't match group keyword
+    const keyword = groupName.replace(/[^\w\s]/g,'').toLowerCase().split(' ').filter(w=>w.length>3)[0]||'';
+    document.querySelectorAll('#feedPosts .post-card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = (!keyword || text.includes(keyword)) ? 'block' : 'none';
+    });
+  };
+
+  window.clearGroupFilter = () => {
+    document.getElementById('groupFilterBar').classList.remove('show');
+    document.querySelectorAll('#feedPosts .post-card').forEach(c => c.style.display = 'block');
+  };
+
+  // LIKE TOGGLE
+  window.toggleLike = (btn) => {
+    const match = btn.textContent.match(/(\d+)/);
+    const count = match ? parseInt(match[1]) : 0;
+    const liked = btn.classList.contains('liked');
+    btn.classList.toggle('liked');
+    btn.textContent = `❤️ ${liked ? count - 1 : count + 1} Likes`;
+  };
+
+  window.joinGroup    = (btn) => { btn.textContent = '✅ Joined'; btn.classList.add('joined'); btn.disabled = true; };
+  window.createGroup  = ()    => alert('Group creation coming soon! This will let you create a local volunteer group for your city or cause.');
+  window.uploadPhoto  = ()    => alert('Photo upload coming soon! You\'ll be able to share field photos directly from your device.');
+  window.postHelp     = ()    => alert('Help request posting coming soon! NGOs and volunteers will be able to post urgent needs here.');
+  window.respond      = (btn) => { btn.textContent = '✅ Responded'; btn.style.background = 'var(--surface)'; btn.style.color = 'var(--muted)'; btn.disabled = true; };
+
+ document.getElementById('themeBtn').addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = dark ? 'light' : 'dark';
+
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+
+  localStorage.setItem('ksTheme', next);
+});
+</script>
+
+<script>
+/* ── KARSEVA MAGIC DYNAMICS ── */
+(function(){
+  /* ── SCROLL REVEAL ── */
+  const style=document.createElement('style');
+  style.textContent=`
+    .ks-reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal.ks-in{opacity:1;transform:none;}
+    .ks-reveal-l{opacity:0;transform:translateX(-30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-l.ks-in{opacity:1;transform:none;}
+    .ks-reveal-r{opacity:0;transform:translateX(30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-r.ks-in{opacity:1;transform:none;}
+    @keyframes ks-shimmer{0%,100%{opacity:.55}50%{opacity:1}}
+    @keyframes ks-popIn{0%{opacity:0;transform:scale(.85) translateY(16px)}100%{opacity:1;transform:none}}
+    @keyframes ks-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes ks-pulse-ring{0%{box-shadow:0 0 0 0 rgba(0,200,150,.4)}70%{box-shadow:0 0 0 10px rgba(0,200,150,0)}100%{box-shadow:0 0 0 0 rgba(0,200,150,0)}}
+    @keyframes ks-spin{to{transform:rotate(360deg)}}
+    .ks-float{animation:ks-float 3.5s ease-in-out infinite;}
+    .ks-pulse{animation:ks-pulse-ring 2s ease-out infinite;}
+    .ks-pop{animation:ks-popIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+    /* card hover lift */
+    .stat-card,.section-card,.f-card,.task-card,.ngo-card,.badge-item,.lb-table-wrap,.bw-item,.podium-card,.city-card,.tov-card,.auth-box,.form-card,.ai-panel,.post-card,.community-card,.donate-card{transition-property:transform,border-color,box-shadow,background!important;transition-duration:.28s!important;}
+    .stat-card:hover,.section-card:hover,.task-card:hover,.ngo-card:hover,.badge-item:hover,.bw-item:hover,.podium-card:hover,.city-card:hover,.tov-card:hover,.community-card:hover,.donate-card:hover{transform:translateY(-4px)!important;box-shadow:0 12px 32px rgba(0,200,150,.1)!important;}
+    .badge-item:hover .badge-emoji{display:inline-block;animation:ks-float 1.2s ease-in-out infinite;}
+    /* button shimmer */
+    .btn-submit,.btn-hero,.btn-post,.btn-cta1,.btn-match,.match-assign-btn,.btn-dashboard,.em-btn,.ai-rec-action{position:relative;overflow:hidden;}
+    .btn-submit::after,.btn-hero::after,.btn-post::after,.btn-cta1::after,.btn-match::after,.match-assign-btn::after,.btn-dashboard::after,.em-btn::after,.ai-rec-action::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);transform:translateX(-200%);transition:transform .45s;}
+    .btn-submit:hover::after,.btn-hero:hover::after,.btn-post:hover::after,.btn-cta1:hover::after,.btn-match:hover::after,.match-assign-btn:hover::after,.btn-dashboard:hover::after,.em-btn:hover::after,.ai-rec-action:hover::after{transform:translateX(200%);}
+    /* nav item left-bar indicator */
+    .nav-item.active{border-left:3px solid var(--accent);padding-left:9px;transition:all .2s;}
+    /* input focus ring */
+    .form-input:focus,.lb-search:focus{box-shadow:0 0 0 3px rgba(0,200,150,.15)!important;}
+    /* progress bar */
+    #ks-progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:9999;width:0%;transition:width .1s linear;box-shadow:0 0 6px rgba(0,200,150,.6);}
+    /* ripple */
+    .ks-ripple{position:absolute;border-radius:50%;background:rgba(0,200,150,.25);transform:scale(0);animation:ks-rippleAnim .55s linear;pointer-events:none;}
+    @keyframes ks-rippleAnim{to{transform:scale(4);opacity:0;}}
+  `;
+  document.head.appendChild(style);
+
+  /* ── PROGRESS BAR ── */
+  const pb=document.createElement('div');pb.id='ks-progress';document.body.prepend(pb);
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement.scrollHeight-innerHeight;
+    if(h>0) pb.style.width=(scrollY/h*100)+'%';
+  });
+
+  /* ── SCROLL REVEAL OBSERVER ── */
+  // tag eligible elements
+  const selectors=['.stat-card','.section-card','.task-card','.task-item','.lb-row:not(.header)','.badge-item','.bw-item','.podium-card','.city-card','.tov-card','.ngo-card','.f-card','.step-card','.activity-item','.pstat','.match-card','.donate-card','.community-card','.post-card','.ai-rec-card','.form-card','.auth-box','.ai-panel'];
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('ks-in'),i*40);
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:.08});
+  setTimeout(()=>{
+    document.querySelectorAll(selectors.join(',')).forEach((el,i)=>{
+      el.classList.add('ks-reveal');
+      el.style.transitionDelay=(i%6)*0.04+'s';
+      obs.observe(el);
+    });
+  },100);
+
+  /* ── RIPPLE ON BUTTONS ── */
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('button');
+    if(!btn) return;
+    const r=btn.getBoundingClientRect(),sz=Math.max(r.width,r.height);
+    const rip=document.createElement('span');
+    rip.className='ks-ripple';
+    rip.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px`;
+    btn.appendChild(rip);
+    setTimeout(()=>rip.remove(),560);
+    // click sparks
+    for(let i=0;i<8;i++){
+      const s=document.createElement('div');
+      const a=Math.random()*Math.PI*2,d=20+Math.random()*35;
+      s.style.cssText=`position:fixed;pointer-events:none;z-index:9997;width:4px;height:4px;border-radius:50%;background:var(--accent);left:${e.clientX}px;top:${e.clientY}px;transform:translate(-50%,-50%);transition:all .5s cubic-bezier(.1,.8,.2,1)`;
+      document.body.appendChild(s);
+      requestAnimationFrame(()=>{s.style.transform=`translate(${Math.cos(a)*d-2}px,${Math.sin(a)*d-2}px)`;s.style.opacity='0';s.style.width='2px';s.style.height='2px';});
+      setTimeout(()=>s.remove(),510);
+    }
+  });
+
+  /* ── TILT CARDS ── */
+  document.querySelectorAll('.stat-card,.badge-item,.podium-card,.city-card,.f-card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`translateY(-4px) rotateX(${-y*6}deg) rotateY(${x*6}deg)`;
+      card.style.transformStyle='preserve-3d';
+    });
+    card.addEventListener('mouseleave',()=>{card.style.transform='';});
+  });
+
+  /* ── COUNTER ANIMATION ── */
+  function animateCounter(el,target,suffix){
+    let start=null,orig=el.textContent;
+    const fmt=n=>n.toLocaleString()+suffix;
+    const step=ts=>{
+      if(!start)start=ts;
+      const p=Math.min((ts-start)/1400,1),ease=1-Math.pow(1-p,3);
+      el.textContent=fmt(Math.round(ease*target));
+      if(p<1)requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  const cObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const el=e.target;
+      const raw=el.textContent.replace(/,/g,'');
+      const num=parseFloat(raw);
+      const suffix=raw.replace(/[\d.]/g,'').replace(num.toString().replace(/,/g,''),'');
+      if(!isNaN(num)&&num>10)animateCounter(el,num,suffix);
+      cObs.unobserve(el);
+    });
+  },{threshold:.5});
+  document.querySelectorAll('.stat-card-num,.stat-num,.podium-pts,.lb-pts,.lb-pts-val,.yrb-pts,.pstat-num').forEach(el=>cObs.observe(el));
+
+  /* ── SIDEBAR NAV SLIDE ── */
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('mouseenter',()=>{item.style.paddingLeft='16px';});
+    item.addEventListener('mouseleave',()=>{if(!item.classList.contains('active'))item.style.paddingLeft='';});
+  });
+
+  /* ── INPUT FOCUS LABELS ── */
+  document.querySelectorAll('.form-input').forEach(inp=>{
+    inp.addEventListener('focus',()=>{inp.style.background='var(--surface)';});
+    inp.addEventListener('blur',()=>{inp.style.background='';});
+  });
+
+  /* ── THEME TOGGLE SPIN ── */
+  const tBtn=document.getElementById('themeBtn');
+  if(tBtn){
+    tBtn.addEventListener('click',()=>{
+      tBtn.style.transform='rotate(360deg)';
+      tBtn.style.transition='transform .4s cubic-bezier(.34,1.56,.64,1)';
+      setTimeout(()=>{tBtn.style.transform='';},420);
+    });
+  }
+
+  /* ── STAT CARD ACCENT BAR ── */
+  document.querySelectorAll('.stat-card').forEach(c=>{
+    const bar=document.createElement('div');
+    bar.style.cssText='position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);border-radius:0 0 14px 14px;transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.77,0,.18,1);';
+    c.style.position='relative';c.style.overflow='hidden';
+    c.appendChild(bar);
+    c.addEventListener('mouseenter',()=>{bar.style.transform='scaleX(1)';});
+    c.addEventListener('mouseleave',()=>{bar.style.transform='scaleX(0)';});
+  });
+
+  /* ── BADGE FLOAT ON HOVER ── */
+  document.querySelectorAll('.badge-emoji,.pb,.bw-emoji').forEach(em=>{
+    em.addEventListener('mouseenter',()=>{em.style.animation='ks-float 1s ease-in-out infinite';em.style.display='inline-block';});
+    em.addEventListener('mouseleave',()=>{em.style.animation='';});
+  });
+
+  /* ── AVATAR PULSE ON HOVER ── */
+  document.querySelectorAll('.user-av,.lb-av,.ngo-av,.match-av,.podium-av,.yrb-av').forEach(av=>{
+    av.addEventListener('mouseenter',()=>{av.style.animation='ks-pulse-ring 1s ease-out infinite';});
+    av.addEventListener('mouseleave',()=>{av.style.animation='';});
+  });
+
+  /* ── EMERGENCY BANNER ATTENTION SHAKE ── */
+  const em=document.getElementById('emergencyBanner');
+  if(em&&!em.classList.contains('hidden')){
+    const shakeStyle=document.createElement('style');
+    shakeStyle.textContent='@keyframes ks-shake{0%,100%{transform:none}10%,30%,50%,70%,90%{transform:translateX(-4px)}20%,40%,60%,80%{transform:translateX(4px)}}';
+    document.head.appendChild(shakeStyle);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},1200);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},5000);
+  }
+
+  /* ── LB ROW HOVER RANK HIGHLIGHT ── */
+  document.querySelectorAll('.lb-row:not(.header):not(.you)').forEach(row=>{
+    row.addEventListener('mouseenter',()=>{row.style.background='var(--surface2)';row.style.paddingLeft='28px';row.style.transition='all .2s';});
+    row.addEventListener('mouseleave',()=>{row.style.background='';row.style.paddingLeft='';});
+  });
+
+  /* ── PODIUM CROWN FLOAT ── */
+  document.querySelectorAll('.podium-crown').forEach(c=>{
+    c.style.display='inline-block';c.style.animation='ks-float 2.5s ease-in-out infinite';
+    c.style.animationDelay=Math.random()*.8+'s';
+  });
+
+  /* ── BLINK DOT PULSE ── */
+  document.querySelectorAll('.em-dot,.badge-dot,.ai-dot,.tag-dot').forEach(dot=>{
+    dot.style.boxShadow='0 0 0 0 rgba(0,200,150,.4)';
+    dot.style.animation='blink 2s infinite, ks-pulse-ring 2s ease-out infinite';
+  });
+
+  /* ── TASK CARD URGENCY PULSE ── */
+  document.querySelectorAll('.task-status.urgent,.urgency.high').forEach(el=>{
+    el.style.animation='ks-shimmer 1.6s ease-in-out infinite';
+  });
+
+  /* ── PAGE ENTRY FADE ── */
+  document.body.style.opacity='0';
+  document.body.style.transition='opacity .4s ease';
+  window.addEventListener('load',()=>{document.body.style.opacity='1';});
+
+  /* ── SMOOTH LINK TRANSITIONS ── */
+  document.querySelectorAll('[onclick*="location.href"],[onclick*="window.location"]').forEach(el=>{
+    el.addEventListener('click',e=>{
+      e.preventDefault();
+      const match=el.getAttribute('onclick').match(/href='([^']+)'/);
+      if(match){
+        document.body.style.opacity='0';
+        setTimeout(()=>{window.location.href=match[1];},300);
+      }
+    });
+  });
+
+})();
+</script>
+
+<style>
+/* community specific */
+/* post card hover */
+.post-card,.community-card{transition:all .25s cubic-bezier(.34,1.2,.64,1)!important;}
+/* member avatars float on hover */
+.member-av,.comment-av,.post-av{transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
+.member-av:hover,.post-av:hover{transform:scale(1.15) rotate(-5deg);}
+/* like button pop */
+.like-btn,.btn-like{transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
+.like-btn:hover,.btn-like:hover{transform:scale(1.25);}
+/* group card stagger */
+[class*="group-card"],[class*="community-card"]{transition:all .3s cubic-bezier(.34,1.2,.64,1);}
+[class*="group-card"]:hover,[class*="community-card"]:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,200,150,.1);}
+/* post textarea grow */
+textarea{transition:height .3s ease;}
+/* online dot pulse */
+[class*="online"],[class*="status-dot"]{animation:ks-pulse-ring 2s ease-out infinite;}
+/* photo grid hover zoom */
+[class*="photo"],[class*="img-thumb"]{transition:transform .3s ease,filter .3s;}
+[class*="photo"]:hover,[class*="img-thumb"]:hover{transform:scale(1.05);filter:brightness(1.1);}
+</style>
+<script>
+(function(){
+  /* stagger post cards */
+  document.querySelectorAll('[class*="post"],[class*="community-card"],[class*="group"]').forEach((c,i)=>{
+    c.style.opacity='0';c.style.transform='translateY(16px)';
+    c.style.transition=`opacity .45s ${i*.07}s ease,transform .45s ${i*.07}s cubic-bezier(.34,1.2,.64,1)`;
+    setTimeout(()=>{c.style.opacity='1';c.style.transform='none';},100+i*70);
+  });
+  /* like btn click heart burst */
+  document.querySelectorAll('[class*="like"],[class*="heart"]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      btn.style.transform='scale(1.4)';
+      btn.style.transition='transform .2s cubic-bezier(.34,1.56,.64,1)';
+      setTimeout(()=>{btn.style.transform='scale(1)';},200);
+    });
+  });
+})();
+</script>
+</body>
+</html>

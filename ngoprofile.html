@@ -1,0 +1,628 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <script>
+  (function(){
+    const t = localStorage.getItem('ksTheme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KarSeva — My NGO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    [data-theme="dark"]{--bg:#0A0F0D;--surface:#111714;--surface2:#182018;--border:#1E2B22;--accent:#00C896;--accent-dim:rgba(0,200,150,.12);--accent-border:rgba(0,200,150,.28);--text:#F0FFF8;--muted:#7A9E8A;--danger:#EF4444;--danger-dim:rgba(239,68,68,.1);--warning:#F5A623;}
+    [data-theme="light"]{--bg:#F2FCF7;--surface:#FFFFFF;--surface2:#E8F5EE;--border:#C8E6D6;--accent:#009E72;--accent-dim:rgba(0,158,114,.10);--accent-border:rgba(0,158,114,.32);--text:#071A0F;--muted:#3D7A58;--danger:#DC2626;--danger-dim:rgba(220,38,38,.08);--warning:#D97706;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;transition:background .35s,color .35s;}
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;z-index:100;}
+    .sidebar-logo{font-size:20px;font-weight:800;letter-spacing:-.02em;padding:0 12px;margin-bottom:32px;}
+    .sidebar-logo span{color:var(--accent);}
+    .nav-section-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 12px;margin-bottom:8px;margin-top:20px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .2s,color .2s;margin-bottom:2px;}
+    .nav-item:hover{background:var(--surface2);color:var(--text);}
+    .nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:700;}
+    .nav-icon{font-size:17px;width:20px;text-align:center;}
+    .sidebar-bottom{margin-top:auto;}
+    .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);}
+    .user-av{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .user-name{font-size:13px;font-weight:700;}
+    .user-role{font-size:11px;color:var(--muted);}
+    .main{margin-left:240px;padding:32px;min-height:100vh;}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+    .topbar h1{font-size:22px;font-weight:800;letter-spacing:-.01em;}
+    .topbar p{font-size:14px;color:var(--muted);margin-top:2px;}
+    .theme-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+    .theme-toggle:hover{border-color:var(--accent);}
+
+    /* ACCESS DENIED */
+    .access-denied{display:none;text-align:center;padding:80px 32px;}
+    .access-denied .icon{font-size:64px;margin-bottom:20px;}
+    .access-denied h2{font-size:24px;font-weight:800;margin-bottom:10px;}
+    .access-denied p{font-size:15px;color:var(--muted);}
+
+    /* LAYOUT */
+    .ngo-grid{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;}
+
+    /* NGO CARD */
+    .ngo-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;margin-bottom:20px;transition:background .35s;}
+    .ngo-av-wrap{position:relative;display:inline-block;margin-bottom:16px;}
+    .ngo-av{width:90px;height:90px;border-radius:20px;background:var(--accent);color:#0A0F0D;font-size:32px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto;}
+    .ngo-av-edit{position:absolute;bottom:-6px;right:-6px;width:26px;height:26px;border-radius:7px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;}
+    .ngo-av-edit:hover{border-color:var(--accent);}
+    .ngo-name-disp{font-size:20px;font-weight:800;margin-bottom:4px;}
+    .ngo-type-disp{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:4px;}
+    .ngo-city-disp{font-size:13px;color:var(--muted);margin-bottom:20px;}
+    .ngo-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;}
+    .ns-item{background:var(--surface2);border-radius:10px;padding:12px 8px;}
+    .ns-num{font-size:18px;font-weight:800;color:var(--accent);}
+    .ns-label{font-size:11px;color:var(--muted);margin-top:2px;}
+    .verified-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:14px;}
+    .status-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:10px;padding:12px 14px;}
+    .status-label{font-size:13px;font-weight:600;}
+    .toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+    .toggle-switch input{opacity:0;width:0;height:0;}
+    .toggle-track{position:absolute;inset:0;background:var(--border);border-radius:99px;cursor:pointer;transition:background .25s;}
+    .toggle-track::after{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .25s;}
+    .toggle-switch input:checked + .toggle-track{background:var(--accent);}
+    .toggle-switch input:checked + .toggle-track::after{transform:translateX(18px);}
+
+    /* NGO ID */
+    .ngo-id-card{background:var(--surface2);border:1px solid var(--accent-border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;}
+    .ngo-id-num{font-size:16px;font-weight:800;color:var(--accent);letter-spacing:.06em;}
+    .ngo-id-sub{font-size:12px;color:var(--muted);}
+    .ngo-id-badge{margin-left:auto;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+
+    /* FORM */
+    .section-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;transition:background .35s;}
+    .section-card:last-child{margin-bottom:0;}
+    .sc-title{font-size:16px;font-weight:800;margin-bottom:20px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.full{grid-column:1/-1;}
+    .form-label{font-size:13px;font-weight:600;color:var(--muted);}
+    .form-input{padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:var(--accent);}
+    .form-input::placeholder{color:var(--muted);}
+    select.form-input{cursor:pointer;}
+    textarea.form-input{resize:vertical;min-height:90px;}
+
+    /* CAUSE CHIPS */
+    .cause-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+    .cause-chip{padding:7px 14px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+    .cause-chip:hover{border-color:var(--accent);color:var(--accent);}
+    .cause-chip.selected{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+
+    /* BUTTONS */
+    .btn-save{padding:12px 28px;border-radius:10px;background:var(--accent);color:#0A0F0D;font-size:14px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;transition:opacity .2s,transform .15s;}
+    .btn-save:hover{opacity:.88;transform:translateY(-1px);}
+    .btn-save:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .btn-danger{padding:10px 20px;border-radius:10px;border:1px solid rgba(239,68,68,.4);background:var(--danger-dim);color:var(--danger);font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:background .2s;}
+    .btn-danger:hover{background:rgba(239,68,68,.2);}
+
+    /* DOCUMENTS */
+    .doc-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;}
+    .doc-icon{font-size:22px;}
+    .doc-name{font-size:14px;font-weight:600;flex:1;}
+    .doc-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;}
+    .doc-status.verified{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+    .doc-status.pending{background:rgba(245,166,35,.12);color:var(--warning);border:1px solid rgba(245,166,35,.3);}
+    .doc-upload{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s;}
+    .doc-upload:hover{border-color:var(--accent);color:var(--accent);}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:28px;right:28px;background:var(--surface);border:1px solid var(--accent-border);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:700;color:var(--accent);z-index:999;display:none;}
+    .toast.show{display:block;animation:fadeUp .25s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+    /* DANGER ZONE */
+    .danger-zone{background:var(--danger-dim);border:1px solid rgba(239,68,68,.25);border-radius:16px;padding:24px;margin-bottom:20px;}
+    .dz-title{font-size:15px;font-weight:800;color:var(--danger);margin-bottom:8px;}
+    .dz-sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
+
+    @media(max-width:900px){.sidebar{display:none;}.main{margin-left:0;padding:20px;}.ngo-grid{grid-template-columns:1fr;}.form-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">Kar<span>Seva</span></div>
+  <div class="nav-section-label">Main</div>
+  <div class="nav-item" onclick="location.href='dashboard.html'"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="location.href='tasks.html'"><span class="nav-icon">✅</span> Tasks</div>
+  <div class="nav-item" onclick="location.href='community.html'"><span class="nav-icon">👥</span> Community</div>
+  <div class="nav-item" onclick="location.href='leaderboard.html'"><span class="nav-icon">🏅</span> Leaderboard</div>
+  <div class="nav-item" onclick="location.href='donate.html'"><span class="nav-icon">❤️</span> Donate</div>
+  <div class="nav-item" onclick="location.href='admin.html'"><span class="nav-icon">🧠</span> Admin Panel</div>
+  <div class="nav-section-label">Account</div>
+  <div class="nav-item" onclick="location.href='PROFILE.html'"><span class="nav-icon">👤</span> My Profile</div>
+  <div class="nav-item" onclick="location.href='settings.html'"><span class="nav-icon">⚙️</span> Settings</div>
+  <div class="nav-item active" id="ngoNav" style="display:none;"><span class="nav-icon">🏡</span> My NGO</div>
+  <div class="nav-item active" id="ngoNav" style="display:none;"><span class="nav-icon">🏡</span> My NGO</div>
+  
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-av" id="sidebarAv">--</div>
+      <div>
+        <div class="user-name" id="sidebarName">Loading...</div>
+        <div class="user-role">NGO Admin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>🏛️ My NGO</h1>
+      <p>Manage your organisation's profile on KarSeva</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn">🌙</button>
+  </div>
+
+  <!-- ACCESS DENIED (shown for non-NGO) -->
+  <div class="access-denied" id="accessDenied">
+    <div class="icon">🔒</div>
+    <h2>Admin Access Only</h2>
+    <p>This page is only accessible to NGO admins.<br/>If you represent an NGO, please sign up with the NGO role.</p>
+  </div>
+
+  <!-- NGO CONTENT -->
+  <div id="ngoContent" style="display:none;">
+    <div class="ngo-grid">
+
+      <!-- LEFT -->
+      <div>
+        <div class="ngo-card">
+          <div class="ngo-av-wrap">
+            <div class="ngo-av" id="ngoAv">--</div>
+            <div class="ngo-av-edit">✏️</div>
+          </div>
+          <div class="ngo-name-disp" id="ngoNameDisp">Your NGO</div>
+          <div class="ngo-type-disp" id="ngoTypeDisp">NGO</div>
+          <div class="ngo-city-disp" id="ngoCityDisp">📍 Location not set</div>
+          <div class="verified-badge">✅ Verified on KarSeva</div>
+          <div class="ngo-stats">
+            <div class="ns-item"><div class="ns-num" id="ngoVolCount">0</div><div class="ns-label">Volunteers</div></div>
+            <div class="ns-item"><div class="ns-num" id="ngoTaskCount">0</div><div class="ns-label">Tasks</div></div>
+            <div class="ns-item"><div class="ns-num" id="ngoDonations">₹0</div><div class="ns-label">Raised</div></div>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Accepting Volunteers</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="acceptingToggle" checked onchange="saveAccepting()"/>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="sc-title">🪪 NGO ID</div>
+          <div class="ngo-id-card">
+            <div style="font-size:22px;">🏛️</div>
+            <div>
+              <div class="ngo-id-num" id="ngoId">NGO-000000</div>
+              <div class="ngo-id-sub">Registered KarSeva Organisation</div>
+            </div>
+            <div class="ngo-id-badge">✅ Active</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div>
+
+        <!-- BASIC INFO -->
+        <div class="section-card">
+          <div class="sc-title">📝 Organisation Details</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">NGO Name</label>
+              <input class="form-input" type="text" id="ngoName" placeholder="HelpFirst India"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Organisation Type</label>
+              <select class="form-input" id="ngoType">
+                <option>Non-Profit NGO</option>
+                <option>Trust</option>
+                <option>Society</option>
+                <option>Section 8 Company</option>
+                <option>Charitable Foundation</option>
+                <option>Community Organisation</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Founded Year</label>
+              <input class="form-input" type="number" id="ngoYear" placeholder="2015" min="1900" max="2026"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Team Size</label>
+              <select class="form-input" id="ngoSize">
+                <option>1–5 people</option>
+                <option>6–20 people</option>
+                <option>21–50 people</option>
+                <option>51–200 people</option>
+                <option>200+ people</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <input class="form-input" type="text" id="ngoCity" placeholder="Indore"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">State</label>
+              <select class="form-input" id="ngoState">
+                <option value="">Select state</option>
+                <option>Madhya Pradesh</option>
+                <option>Maharashtra</option>
+                <option>Delhi</option>
+                <option>Gujarat</option>
+                <option>Karnataka</option>
+                <option>Tamil Nadu</option>
+                <option>Uttar Pradesh</option>
+                <option>West Bengal</option>
+                <option>Rajasthan</option>
+                <option>Punjab</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input class="form-input" type="tel" id="ngoPhone" placeholder="+91 98765 43210"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Website</label>
+              <input class="form-input" type="url" id="ngoWebsite" placeholder="https://yourngoo.org"/>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">About the Organisation</label>
+              <textarea class="form-input" id="ngoAbout" placeholder="Describe your NGO's mission, the communities you serve, and the impact you create..."></textarea>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Address</label>
+              <input class="form-input" type="text" id="ngoAddress" placeholder="123 Gandhi Road, Indore, MP 452001"/>
+            </div>
+          </div>
+          <div style="margin-top:20px;">
+            <button class="btn-save" id="saveBasicBtn" onclick="saveBasicInfo()">Save Details</button>
+          </div>
+        </div>
+
+        <!-- CAUSES -->
+        <div class="section-card">
+          <div class="sc-title">🎯 Focus Causes</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Select all causes your NGO works on — this helps volunteers find and join your organisation.</p>
+          <div class="cause-wrap" id="causeWrap">
+            <button class="cause-chip" onclick="toggleCause(this)">🚨 Disaster Relief</button>
+            <button class="cause-chip" onclick="toggleCause(this)">📚 Education</button>
+            <button class="cause-chip" onclick="toggleCause(this)">🏥 Healthcare</button>
+            <button class="cause-chip" onclick="toggleCause(this)">🌱 Environment</button>
+            <button class="cause-chip" onclick="toggleCause(this)">🍳 Food & Hunger</button>
+            <button class="cause-chip" onclick="toggleCause(this)">👩 Women Empowerment</button>
+            <button class="cause-chip" onclick="toggleCause(this)">🧒 Child Welfare</button>
+            <button class="cause-chip" onclick="toggleCause(this)">🐾 Animal Welfare</button>
+            <button class="cause-chip" onclick="toggleCause(this)">🏘️ Rural Development</button>
+            <button class="cause-chip" onclick="toggleCause(this)">⚖️ Legal Aid</button>
+            <button class="cause-chip" onclick="toggleCause(this)">💻 Digital Literacy</button>
+            <button class="cause-chip" onclick="toggleCause(this)">♿ Disability Support</button>
+          </div>
+          <div style="margin-top:20px;">
+            <button class="btn-save" onclick="saveCauses()">Save Causes</button>
+          </div>
+        </div>
+
+        <!-- VOLUNTEER REQUIREMENTS -->
+        <div class="section-card">
+          <div class="sc-title">🙋 Volunteer Requirements</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Minimum Age</label>
+              <select class="form-input" id="minAge">
+                <option>18+</option>
+                <option>16+</option>
+                <option>21+</option>
+                <option>No requirement</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Minimum Commitment</label>
+              <select class="form-input" id="minCommit">
+                <option>One-time tasks</option>
+                <option>Weekly 2–4 hrs</option>
+                <option>Weekly 4–8 hrs</option>
+                <option>Monthly camps</option>
+                <option>Flexible</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Special Requirements / Notes for Volunteers</label>
+              <textarea class="form-input" id="volRequirements" placeholder="e.g. Must have own transport, Background check required for child-facing roles, First aid training preferred..."></textarea>
+            </div>
+          </div>
+          <div style="margin-top:20px;">
+            <button class="btn-save" onclick="saveVolReqs()">Save Requirements</button>
+          </div>
+        </div>
+
+        <!-- REGISTRATION DOCUMENTS -->
+        <div class="section-card">
+          <div class="sc-title">📄 Registration Documents</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Upload documents to get your NGO verified on KarSeva. Verified NGOs appear higher in search results.</p>
+          <div class="doc-item">
+            <div class="doc-icon">📋</div>
+            <div class="doc-name">NGO Registration Certificate</div>
+            <span class="doc-status verified">✅ Verified</span>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon">🏦</div>
+            <div class="doc-name">80G / 12A Tax Exemption</div>
+            <span class="doc-status pending">⏳ Pending</span>
+            <button class="doc-upload" onclick="uploadDoc('80G/12A')">Upload</button>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon">🪪</div>
+            <div class="doc-name">PAN Card</div>
+            <span class="doc-status verified">✅ Verified</span>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon">📊</div>
+            <div class="doc-name">Annual Report (latest)</div>
+            <span class="doc-status pending">⏳ Pending</span>
+            <button class="doc-upload" onclick="uploadDoc('Annual Report')">Upload</button>
+          </div>
+        </div>
+
+        <!-- SOCIAL LINKS -->
+        <div class="section-card">
+          <div class="sc-title">🔗 Social & Online Presence</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Facebook</label>
+              <input class="form-input" type="url" id="ngoFacebook" placeholder="https://facebook.com/yourngo"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Instagram</label>
+              <input class="form-input" type="url" id="ngoInstagram" placeholder="https://instagram.com/yourngo"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Twitter / X</label>
+              <input class="form-input" type="url" id="ngoTwitter" placeholder="https://twitter.com/yourngo"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">LinkedIn</label>
+              <input class="form-input" type="url" id="ngoLinkedin" placeholder="https://linkedin.com/company/yourngo"/>
+            </div>
+          </div>
+          <div style="margin-top:20px;">
+            <button class="btn-save" onclick="saveSocial()">Save Links</button>
+          </div>
+        </div>
+
+        <!-- DANGER ZONE -->
+        <div class="danger-zone">
+          <div class="dz-title">⚠️ Danger Zone</div>
+          <div class="dz-sub">These actions are permanent. Delisting removes your NGO from the KarSeva directory.</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn-danger" onclick="delistNGO()">Delist NGO</button>
+            <button class="btn-danger" onclick="signOutUser()">Sign Out</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBM1zpNgjrztamRcvRJlJZxZhUrHqx6xTo",
+    authDomain: "karseva-1fb4f.firebaseapp.com",
+    projectId: "karseva-1fb4f",
+    storageBucket: "karseva-1fb4f.firebasestorage.app",
+    messagingSenderId: "4741841467",
+    appId: "1:4741841467:web:780939d385e60af936521e"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  let uid = null;
+
+  function toast(msg, isError) {
+    const t = document.getElementById('toast');
+    t.textContent = (isError ? '❌ ' : '✅ ') + msg;
+    t.style.borderColor = isError ? 'rgba(239,68,68,.4)' : 'var(--accent-border)';
+    t.style.color = isError ? 'var(--danger)' : 'var(--accent)';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'auth.html'; return; }
+    uid = user.uid;
+
+    const snap = await getDoc(doc(db, 'users', uid));
+    const p = snap.exists() ? snap.data() : {};
+
+    // role guard
+    
+      document.getElementById('ngoNav').style.display = 'flex';
+      
+  
+
+    if (p.role !== 'ngo') {
+      document.getElementById('accessDenied').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('ngoContent').style.display = 'block';
+
+    const fn = p.firstName || '';
+    const ln = p.lastName  || '';
+    const initials = ((fn[0]||'N') + (ln[0]||'')).toUpperCase();
+
+    document.getElementById('sidebarAv').textContent   = initials;
+    document.getElementById('sidebarName').textContent = `${fn} ${ln}`.trim();
+
+    // NGO data lives in the users collection doc
+    const n = p; // already fetched above as snap.data()
+    console.log('NGO uid:', uid, '| role:', p.role, '| data:', p);
+
+    // NGO card
+    const ngoInitials = n.name ? n.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : initials;
+    document.getElementById('ngoAv').textContent       = ngoInitials;
+    document.getElementById('ngoNameDisp').textContent = n.name   || `${fn}'s NGO`;
+    document.getElementById('ngoTypeDisp').textContent = n.type   || 'NGO';
+    document.getElementById('ngoCityDisp').textContent = n.city   ? `📍 ${n.city}` : '📍 Location not set';
+    document.getElementById('ngoId').textContent       = 'NGO-' + uid.slice(0,6).toUpperCase();
+    document.getElementById('acceptingToggle').checked = n.accepting !== false;
+
+    // load volunteer + task counts
+    try {
+      const vSnap = await getDocs(collection(db, 'users'));
+      document.getElementById('ngoVolCount').textContent = vSnap.size;
+      const tSnap = await getDocs(collection(db, 'tasks'));
+      document.getElementById('ngoTaskCount').textContent = tSnap.size;
+    } catch(e) {}
+
+    // fill form fields
+    document.getElementById('ngoName').value         = n.name         || '';
+    document.getElementById('ngoType').value         = n.type         || 'Non-Profit NGO';
+    document.getElementById('ngoYear').value         = n.foundedYear  || '';
+    document.getElementById('ngoSize').value         = n.size         || '1–5 people';
+    document.getElementById('ngoCity').value         = n.city         || '';
+    document.getElementById('ngoState').value        = n.state        || '';
+    document.getElementById('ngoPhone').value        = n.phone        || '';
+    document.getElementById('ngoWebsite').value      = n.website      || '';
+    document.getElementById('ngoAbout').value        = n.about        || '';
+    document.getElementById('ngoAddress').value      = n.address      || '';
+    document.getElementById('minAge').value          = n.minAge       || '18+';
+    document.getElementById('minCommit').value       = n.minCommit    || 'Flexible';
+    document.getElementById('volRequirements').value = n.volRequirements || '';
+    document.getElementById('ngoFacebook').value     = n.facebook     || '';
+    document.getElementById('ngoInstagram').value    = n.instagram    || '';
+    document.getElementById('ngoTwitter').value      = n.twitter      || '';
+    document.getElementById('ngoLinkedin').value     = n.linkedin     || '';
+
+    // causes
+    const savedCauses = n.causes || [];
+    document.querySelectorAll('.cause-chip').forEach(chip => {
+      if (savedCauses.includes(chip.textContent.trim())) chip.classList.add('selected');
+    });
+  });
+
+  async function saveNGODoc(data) {
+    await setDoc(doc(db, 'users', uid), { ...data, updatedAt: serverTimestamp() }, { merge: true });
+  }
+
+  window.toggleCause = (el) => el.classList.toggle('selected');
+
+  window.saveBasicInfo = async () => {
+    const btn = document.getElementById('saveBasicBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    const name = document.getElementById('ngoName').value.trim();
+    const city = document.getElementById('ngoCity').value.trim();
+    const type = document.getElementById('ngoType').value;
+    try {
+      await saveNGODoc({
+        name, city, type,
+        foundedYear: document.getElementById('ngoYear').value,
+        size:        document.getElementById('ngoSize').value,
+        state:       document.getElementById('ngoState').value,
+        phone:       document.getElementById('ngoPhone').value.trim(),
+        website:     document.getElementById('ngoWebsite').value.trim(),
+        about:       document.getElementById('ngoAbout').value.trim(),
+        address:     document.getElementById('ngoAddress').value.trim(),
+      });
+      // update card live
+      if (name) {
+        const ngoInitials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        document.getElementById('ngoAv').textContent       = ngoInitials;
+        document.getElementById('ngoNameDisp').textContent = name;
+        document.getElementById('ngoTypeDisp').textContent = type;
+        document.getElementById('ngoCityDisp').textContent = city ? `📍 ${city}` : '📍 Location not set';
+      }
+      toast('Organisation details saved!');
+    } catch(e) { toast('Failed to save.', true); }
+    btn.disabled = false; btn.textContent = 'Save Details';
+  };
+
+  window.saveCauses = async () => {
+    const causes = [...document.querySelectorAll('.cause-chip.selected')].map(c => c.textContent.trim());
+    try {
+      await saveNGODoc({ causes });
+      toast(`${causes.length} causes saved!`);
+    } catch(e) { toast('Failed to save.', true); }
+  };
+
+  window.saveVolReqs = async () => {
+    try {
+      await saveNGODoc({
+        minAge:           document.getElementById('minAge').value,
+        minCommit:        document.getElementById('minCommit').value,
+        volRequirements:  document.getElementById('volRequirements').value.trim(),
+      });
+      toast('Volunteer requirements saved!');
+    } catch(e) { toast('Failed to save.', true); }
+  };
+
+  window.saveSocial = async () => {
+    try {
+      await saveNGODoc({
+        facebook:  document.getElementById('ngoFacebook').value.trim(),
+        instagram: document.getElementById('ngoInstagram').value.trim(),
+        twitter:   document.getElementById('ngoTwitter').value.trim(),
+        linkedin:  document.getElementById('ngoLinkedin').value.trim(),
+      });
+      toast('Social links saved!');
+    } catch(e) { toast('Failed to save.', true); }
+  };
+
+  window.saveAccepting = async () => {
+    const isOn = document.getElementById('acceptingToggle').checked;
+    try {
+      await saveNGODoc({ accepting: isOn });
+      toast(isOn ? 'Now accepting volunteers!' : 'Paused volunteer applications.');
+    } catch(e) {}
+  };
+
+  window.uploadDoc = (name) => {
+    toast(`Document upload for "${name}" coming soon — contact support@karseva.in to submit documents manually.`);
+  };
+
+  window.delistNGO = () => {
+    if (confirm('Are you sure you want to delist your NGO from KarSeva? This will hide your profile from volunteers.')) {
+      saveNGODoc({ delisted: true }).then(() => {
+        toast('NGO has been delisted. Contact support to re-list.');
+      });
+    }
+  };
+
+  window.signOutUser = async () => {
+    await signOut(auth);
+    window.location.href = 'auth.html';
+  };
+
+  document.getElementById('themeBtn').addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = dark ? 'light' : 'dark';
+
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+
+  localStorage.setItem('ksTheme', next);
+});
+</script>
+</body>
+</html>
+
+
+

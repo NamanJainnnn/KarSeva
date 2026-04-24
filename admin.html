@@ -1,0 +1,1230 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <script>
+  (function(){
+    const t = localStorage.getItem('ksTheme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KarSeva — Admin & Resource Allocation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+    [data-theme="dark"]{
+      --bg:#0A0F0D;--surface:#111714;--surface2:#182018;--border:#1E2B22;
+      --accent:#00C896;--accent-dim:rgba(0,200,150,.12);--accent-border:rgba(0,200,150,.28);
+      --text:#F0FFF8;--muted:#7A9E8A;--danger:#EF4444;--danger-dim:rgba(239,68,68,.1);
+      --warning:#F5A623;--warning-dim:rgba(245,166,35,.12);--info:#3B82F6;--info-dim:rgba(59,130,246,.1);
+    }
+    [data-theme="light"]{
+      --bg:#F2FCF7;--surface:#FFFFFF;--surface2:#E8F5EE;--border:#C8E6D6;
+      --accent:#009E72;--accent-dim:rgba(0,158,114,.10);--accent-border:rgba(0,158,114,.32);
+      --text:#071A0F;--muted:#3D7A58;--danger:#DC2626;--danger-dim:rgba(220,38,38,.08);
+      --warning:#D97706;--warning-dim:rgba(217,119,6,.1);--info:#2563EB;--info-dim:rgba(37,99,235,.08);
+    }
+
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;transition:background .35s,color .35s;}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;z-index:100;transition:background .35s;}
+    .sidebar-logo{font-size:20px;font-weight:800;letter-spacing:-.02em;padding:0 12px;margin-bottom:32px;}
+    .sidebar-logo span{color:var(--accent);}
+    .nav-section-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 12px;margin-bottom:8px;margin-top:20px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .2s,color .2s;margin-bottom:2px;}
+    .nav-item:hover{background:var(--surface2);color:var(--text);}
+    .nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:700;}
+    .nav-icon{font-size:17px;width:20px;text-align:center;}
+    .sidebar-bottom{margin-top:auto;}
+    .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);}
+    .user-av{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .user-name{font-size:13px;font-weight:700;}
+    .user-role{font-size:11px;color:var(--muted);}
+
+    /* ── MAIN ── */
+    .main{margin-left:240px;padding:32px;min-height:100vh;}
+
+    /* ── TOPBAR ── */
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+    .topbar h1{font-size:22px;font-weight:800;letter-spacing:-.01em;}
+    .topbar p{font-size:14px;color:var(--muted);margin-top:2px;}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .theme-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+    .theme-toggle:hover{border-color:var(--accent);}
+
+    /* ── STAT CARDS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color .2s,background .35s;}
+    .stat-card:hover{border-color:var(--accent);}
+    .stat-icon{font-size:22px;margin-bottom:10px;}
+    .stat-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+    .stat-num{font-size:30px;font-weight:800;color:var(--accent);line-height:1;}
+    .stat-sub{font-size:12px;color:var(--muted);margin-top:6px;}
+
+    /* ── SECTION CARD ── */
+    .section-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;transition:background .35s;}
+    .sc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .sc-title{font-size:16px;font-weight:800;}
+    .sc-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+    .sc-link{font-size:13px;color:var(--accent);font-weight:600;cursor:pointer;}
+
+    /* ── AI ALLOCATION PANEL ── */
+    .ai-alloc-panel{background:var(--surface);border:2px solid var(--accent-border);border-radius:16px;padding:28px;margin-bottom:24px;position:relative;overflow:hidden;}
+    .ai-alloc-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#00A8E8,var(--accent));background-size:200%;animation:shimmer 2s linear infinite;}
+    @keyframes shimmer{0%{background-position:200%;}100%{background-position:-200%;}}
+
+    .ai-header{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+    .ai-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:99px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--accent);}
+    .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1.5s infinite;}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+    .ai-alloc-panel h2{font-size:18px;font-weight:800;margin-bottom:6px;}
+    .ai-alloc-panel p{font-size:14px;color:var(--muted);margin-bottom:20px;}
+
+    .btn-analyze{padding:12px 24px;border-radius:10px;background:var(--accent);color:#0A0F0D;font-size:14px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;transition:opacity .2s,transform .15s;}
+    .btn-analyze:hover{opacity:.88;transform:translateY(-1px);}
+    .btn-analyze:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+    /* thinking */
+    .ai-thinking{display:none;align-items:center;gap:12px;padding:16px;background:var(--surface2);border-radius:12px;margin-top:16px;}
+    .ai-thinking.show{display:flex;}
+    .think-dots{display:flex;gap:5px;}
+    .think-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bounce .8s infinite;}
+    .think-dot:nth-child(2){animation-delay:.15s;}
+    .think-dot:nth-child(3){animation-delay:.3s;}
+    @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+    .think-text{font-size:14px;color:var(--muted);}
+
+    /* AI recommendation cards */
+    .ai-recs{display:none;margin-top:20px;}
+    .ai-recs.show{display:block;}
+    .ai-rec-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:12px;border-left:4px solid var(--accent);}
+    .ai-rec-card.urgent{border-left-color:var(--danger);}
+    .ai-rec-card.warning{border-left-color:var(--warning);}
+    .ai-rec-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+    .ai-rec-type{font-size:11px;font-weight:700;padding:2px 10px;border-radius:99px;}
+    .type-critical{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,.3);}
+    .type-optimize{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,166,35,.3);}
+    .type-suggest{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+    .ai-rec-title{font-size:15px;font-weight:800;}
+    .ai-rec-body{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+    .ai-rec-action{padding:8px 16px;border-radius:8px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;transition:opacity .2s;}
+    .ai-rec-action:hover{opacity:.85;}
+
+    /* ── CITY ALLOCATION MAP ── */
+    .city-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+    .city-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:18px;transition:border-color .2s;}
+    .city-card:hover{border-color:var(--accent);}
+    .city-name{font-size:15px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .city-stat-row{display:flex;justify-content:space-between;margin-bottom:8px;}
+    .city-stat-label{font-size:12px;color:var(--muted);}
+    .city-stat-val{font-size:13px;font-weight:700;}
+    .city-bar-wrap{margin-top:10px;}
+    .city-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;}
+    .city-bar{height:6px;border-radius:99px;background:var(--border);overflow:hidden;}
+    .city-bar-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .6s ease;}
+    .city-bar-fill.danger{background:var(--danger);}
+    .city-bar-fill.warning{background:var(--warning);}
+    .city-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;margin-top:10px;display:inline-block;}
+    .status-ok{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+    .status-low{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,166,35,.3);}
+    .status-critical{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,.3);}
+
+    /* ── VOLUNTEERS TABLE ── */
+    .vol-table{width:100%;border-collapse:collapse;}
+    .vol-table th{font-size:12px;font-weight:700;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;}
+    .vol-table td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:14px;}
+    .vol-table tr:last-child td{border-bottom:none;}
+    .vol-table tr:hover td{background:var(--surface2);}
+    .vol-av-sm{width:30px;height:30px;border-radius:8px;background:var(--accent);color:#0A0F0D;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;}
+    .status-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;}
+    .pill-avail{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+    .pill-busy{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,166,35,.3);}
+    .pill-offline{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+
+    /* ── TASKS OVERVIEW ── */
+    .task-overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .tov-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;}
+    .tov-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+    .tov-meta{font-size:12px;color:var(--muted);margin-bottom:12px;}
+    .tov-progress{height:6px;border-radius:99px;background:var(--border);margin-bottom:6px;overflow:hidden;}
+    .tov-fill{height:100%;border-radius:99px;background:var(--accent);}
+    .tov-fill.danger{background:var(--danger);}
+    .tov-nums{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
+
+    /* EMERGENCY BROADCAST */
+    .broadcast-box{background:var(--danger-dim);border:1px solid rgba(239,68,68,.3);border-radius:14px;padding:20px;}
+    .broadcast-box h3{font-size:15px;font-weight:800;color:var(--danger);margin-bottom:8px;}
+    .broadcast-box p{font-size:13px;color:var(--muted);margin-bottom:14px;}
+    .broadcast-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid rgba(239,68,68,.3);background:var(--surface);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;margin-bottom:10px;}
+    .broadcast-input:focus{border-color:var(--danger);}
+    .btn-broadcast{padding:10px 20px;border-radius:8px;background:var(--danger);color:#fff;font-size:13px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;transition:opacity .2s;}
+    .btn-broadcast:hover{opacity:.88;}
+
+    @media(max-width:900px){
+      .sidebar{display:none;}
+      .main{margin-left:0;padding:20px;}
+      .stats-grid{grid-template-columns:1fr 1fr;}
+      .task-overview-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">Kar<span>Seva</span></div>
+  <div class="nav-section-label">Main</div>
+  <div class="nav-item" onclick="location.href='dashboard.html'"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="location.href='tasks.html'"><span class="nav-icon">✅</span> Tasks</div>
+  <div class="nav-item active"><span class="nav-icon">🧠</span> Admin Panel</div>
+  <div class="nav-item" onclick="location.href='community.html'"><span class="nav-icon">👥</span> Community</div>
+  <div class="nav-item" onclick="location.href='leaderboard.html'"><span class="nav-icon">🏅</span> Leaderboard</div>
+  <div class="nav-item" onclick="location.href='donate.html'"><span class="nav-icon">❤️</span> Donate</div>
+  <div class="nav-section-label">Admin</div>
+  <div class="nav-item" id="ngoNav" style="display:none;" onclick="location.href='ngoprofile.html'"><span class="nav-icon">🏡</span> My NGO</div>
+  <div class="nav-item" onclick="location.href='settings.html'"><span class="nav-icon">⚙️</span> Settings</div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-av" id="sidebarAv">--</div>
+      <div>
+        <div class="user-name" id="sidebarName">Loading...</div>
+        <div class="user-role">NGO Admin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <h1>Admin & Resource Allocation</h1>
+      <p id="adminSub">Smart volunteer coordination powered by Gemini AI</p>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" id="themeBtn">🌙</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">🙋</div>
+      <div class="stat-label">Total Volunteers</div>
+      <div class="stat-num" id="statVols">--</div>
+      <div class="stat-sub" id="statVolsSub">across all cities</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-label">Available Now</div>
+      <div class="stat-num" id="statAvail">--</div>
+      <div class="stat-sub">ready to be assigned</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📋</div>
+      <div class="stat-label">Open Tasks</div>
+      <div class="stat-num" id="statTasks">--</div>
+      <div class="stat-sub">need volunteers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-label">Understaffed</div>
+      <div class="stat-num" id="statUnder" style="color:var(--danger);">--</div>
+      <div class="stat-sub">tasks need attention</div>
+    </div>
+  </div>
+
+  <!-- ── GEMINI RESOURCE ALLOCATION ── -->
+  <div class="ai-alloc-panel">
+    <div class="ai-header">
+      <div class="ai-badge"><div class="ai-dot"></div>Gemini AI</div>
+      <span style="font-size:12px;color:var(--muted);">Smart Resource Allocation Engine</span>
+    </div>
+    <h2>🧠 AI Resource Allocation</h2>
+    <p>Gemini analyses your volunteer pool, open tasks, city coverage and urgency levels — then tells you exactly where to send who and why.</p>
+    <button class="btn-analyze" id="analyzeBtn" onclick="runAllocation()">Run AI Allocation Analysis 🤖</button>
+
+    <!-- thinking -->
+    <div class="ai-thinking" id="aiThinking">
+      <div class="think-dots">
+        <div class="think-dot"></div><div class="think-dot"></div><div class="think-dot"></div>
+      </div>
+      <div class="think-text" id="thinkText">Gemini is mapping volunteers to tasks...</div>
+    </div>
+
+    <!-- recommendations -->
+    <div class="ai-recs" id="aiRecs"></div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+
+    <!-- CITY ALLOCATION -->
+    <div class="section-card" style="margin-bottom:0;">
+      <div class="sc-header">
+        <div>
+          <div class="sc-title">📍 Volunteer Coverage by City</div>
+          <div class="sc-sub">Available volunteers vs open tasks</div>
+        </div>
+      </div>
+      <div class="city-grid" id="cityGrid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- TASK OVERVIEW -->
+    <div class="section-card" style="margin-bottom:0;">
+      <div class="sc-header">
+        <div>
+          <div class="sc-title">📋 Task Staffing Overview</div>
+          <div class="sc-sub">How filled each task is</div>
+        </div>
+        <div class="sc-link" onclick="location.href='tasks.html'">All tasks →</div>
+      </div>
+      <div class="task-overview-grid" id="taskOverview">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- VOLUNTEERS TABLE -->
+  <div class="section-card">
+    <div class="sc-header">
+      <div>
+        <div class="sc-title">👥 All Volunteers</div>
+        <div class="sc-sub" id="volTableSub">Loading...</div>
+      </div>
+      <input type="text" placeholder="Search volunteers..." oninput="filterVols(this.value)"
+        style="padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-family:Inter,sans-serif;outline:none;width:200px;"/>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="vol-table" id="volTable">
+        <thead>
+          <tr>
+            <th>Volunteer</th>
+            <th>City</th>
+            <th>Points</th>
+            <th>Tasks Done</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="volTableBody">
+          <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">Loading volunteers...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EMERGENCY BROADCAST -->
+  <div class="section-card">
+    <div class="sc-title" style="margin-bottom:16px;">🚨 Emergency Broadcast</div>
+    <div class="broadcast-box">
+      <h3>Send Emergency Alert to All Volunteers</h3>
+      <p>This will instantly notify ALL available volunteers in your selected city with an urgent alert banner on their dashboard.</p>
+      <input class="broadcast-input" type="text" id="broadcastMsg" placeholder="e.g. Urgent: Flood relief needed in Indore — report to Gandhi Nagar at 8am"/>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <select style="padding:9px 14px;border-radius:9px;border:1px solid rgba(239,68,68,.3);background:var(--surface);color:var(--text);font-size:13px;font-family:Inter,sans-serif;outline:none;" id="broadcastCity">
+          <option>All Cities</option>
+          <option>Indore</option>
+          <option>Bhopal</option>
+          <option>Mumbai</option>
+          <option>Pune</option>
+        </select>
+        <button class="btn-broadcast" onclick="sendBroadcast()">🚨 Send Emergency Alert</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FIREBASE + GEMINI -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, addDoc, doc, getDoc, query, where, onSnapshot, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBM1zpNgjrztamRcvRJlJZxZhUrHqx6xTo",
+    authDomain: "karseva-1fb4f.firebaseapp.com",
+    projectId: "karseva-1fb4f",
+    storageBucket: "karseva-1fb4f.firebasestorage.app",
+    messagingSenderId: "4741841467",
+    appId: "1:4741841467:web:780939d385e60af936521e"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let allVolunteers = [];
+  let allTasks = [];
+  let allAssignments = [];
+  let allTaskRequests = [];
+  let allApplications = [];
+  let adminUnsubs = [];
+  let shownAdminAlertId = null;
+
+  function ensureStatusModal() {
+    if (document.getElementById('appStatusModal')) return;
+    document.body.insertAdjacentHTML('beforeend', `
+      <div id="appStatusModal" style="display:none;position:fixed;inset:0;background:rgba(10,15,13,.55);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="width:min(460px,100%);background:var(--surface);border:1px solid rgba(239,68,68,.3);border-radius:18px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.35);">
+          <div style="font-size:14px;font-weight:800;color:var(--danger);margin-bottom:12px;">Emergency Broadcast</div>
+          <div id="appStatusMessage" style="font-size:14px;color:var(--text);line-height:1.7;margin-bottom:18px;"></div>
+          <button type="button" onclick="document.getElementById('appStatusModal').style.display='none'" style="padding:12px 22px;border-radius:10px;background:var(--danger);color:#fff;font-size:14px;font-weight:800;font-family:Inter,sans-serif;border:none;cursor:pointer;">Close</button>
+        </div>
+      </div>
+    `);
+  }
+
+  function showStatusModal(message) {
+    ensureStatusModal();
+    document.getElementById('appStatusMessage').textContent = message;
+    document.getElementById('appStatusModal').style.display = 'flex';
+  }
+
+  function handleIncomingAlert(alertItem) {
+    if (!alertItem || !alertItem.id || alertItem.active === false) {
+      shownAdminAlertId = null;
+      return;
+    }
+
+    if (shownAdminAlertId === alertItem.id) return;
+    shownAdminAlertId = alertItem.id;
+    showStatusModal(`${alertItem.city || 'All Cities'}: ${alertItem.message || 'Urgent volunteer support needed.'}`);
+  }
+  function ensureApplicationsSection() {
+    if (document.getElementById('applicationsSection')) return;
+    const broadcastSection = document.getElementById('broadcastMsg')?.closest('.section-card');
+    if (!broadcastSection) return;
+
+    broadcastSection.insertAdjacentHTML('beforebegin', `
+      <div class="section-card" id="applicationsSection">
+        <div class="sc-header">
+          <div>
+            <div class="sc-title">Pending Applications</div>
+            <div class="sc-sub" id="applicationsSub">Loading applications...</div>
+          </div>
+        </div>
+        <div id="applicationsList" style="display:flex;flex-direction:column;gap:12px;"></div>
+      </div>
+    `);
+  }
+
+  function renderApplications() {
+    ensureApplicationsSection();
+    const list = document.getElementById('applicationsList');
+    const sub = document.getElementById('applicationsSub');
+    if (!list || !sub) return;
+
+    const pendingApplications = allApplications.filter(application => application.status === 'pending');
+    sub.textContent = `${pendingApplications.length} pending application${pendingApplications.length !== 1 ? 's' : ''}`;
+
+    list.innerHTML = pendingApplications.map(application => `
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:14px;font-weight:700;">${application.applicantName || 'Volunteer'}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Applied for ${application.taskTitle || 'Untitled Task'}</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-analyze" type="button" style="padding:10px 18px;" onclick="approveApplication('${application.id}')">Approve</button>
+          <button type="button" style="padding:10px 18px;border-radius:10px;background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,.3);font-size:14px;font-weight:800;font-family:Inter,sans-serif;cursor:pointer;" onclick="rejectApplication('${application.id}')">Reject</button>
+        </div>
+      </div>
+    `).join('') || '<div style="color:var(--muted);font-size:14px;">No pending applications right now.</div>';
+  }
+
+  window.approveApplication = async (applicationId) => {
+    if (!applicationId) return;
+
+    try {
+      const applicationRef = doc(db, 'applications', applicationId);
+      const applicationSnap = await getDoc(applicationRef);
+      if (!applicationSnap.exists()) {
+        showStatusModal('Application not found.');
+        return;
+      }
+
+      const application = applicationSnap.data() || {};
+      await addDoc(collection(db, 'assignments'), {
+        taskId: application.taskId,
+        taskTitle: application.taskTitle || 'Untitled Task',
+        assignedTo: application.applicantId,
+        assignedBy: auth.currentUser?.uid || 'admin',
+        status: 'assigned',
+        createdAt: serverTimestamp()
+      });
+
+      await updateDoc(doc(db, 'tasks', application.taskId), {
+        assignedTo: application.applicantId
+      });
+
+      await updateDoc(applicationRef, {
+        status: 'approved',
+        approvedAt: serverTimestamp()
+      });
+
+      showStatusModal('Application approved and task assigned.');
+    } catch (e) {
+      console.error(e);
+      showStatusModal('Could not approve this application. Please try again.');
+    }
+  };
+
+  window.rejectApplication = async (applicationId) => {
+    if (!applicationId) return;
+    try {
+      await updateDoc(doc(db, 'applications', applicationId), {
+        status: 'rejected',
+        rejectedAt: serverTimestamp()
+      });
+      showStatusModal('Application rejected.');
+    } catch (e) {
+      console.error(e);
+      showStatusModal('Could not reject this application. Please try again.');
+    }
+  };
+
+  // Fix 3: Emergency alert list with Mark Completed / Cancel buttons
+  function ensureAlertsSection() {
+    if (document.getElementById('alertsManagementSection')) return;
+    const broadcastSection = document.getElementById('broadcastMsg')?.closest('.section-card');
+    if (!broadcastSection) return;
+    broadcastSection.insertAdjacentHTML('afterend', `
+      <div class="section-card" id="alertsManagementSection">
+        <div class="sc-header">
+          <div>
+            <div class="sc-title">🚨 Active Alerts</div>
+            <div class="sc-sub" id="alertsManagementSub">Loading alerts...</div>
+          </div>
+        </div>
+        <div id="alertsManagementList" style="display:flex;flex-direction:column;gap:12px;"></div>
+      </div>
+    `);
+  }
+
+  function renderAlertsList(alerts) {
+    ensureAlertsSection();
+    const list = document.getElementById('alertsManagementList');
+    const sub = document.getElementById('alertsManagementSub');
+    if (!list || !sub) return;
+
+    const activeAlerts = alerts.filter(a => a.status !== 'completed' && a.status !== 'cancelled' && a.active !== false);
+    sub.textContent = `${activeAlerts.length} active alert${activeAlerts.length !== 1 ? 's' : ''}`;
+
+    list.innerHTML = activeAlerts.map(alert => `
+      <div style="background:var(--danger-dim);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--danger);">${alert.city || 'All Cities'}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px;">${alert.message || 'Emergency alert'}</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <button type="button" style="padding:8px 14px;border-radius:8px;background:var(--accent);color:#0A0F0D;font-size:12px;font-weight:800;font-family:Inter,sans-serif;border:none;cursor:pointer;" onclick="markAlertStatus('${alert.id}','completed')">Mark Completed</button>
+          <button type="button" style="padding:8px 14px;border-radius:8px;background:var(--surface2);color:var(--muted);font-size:12px;font-weight:800;font-family:Inter,sans-serif;border:1px solid var(--border);cursor:pointer;" onclick="markAlertStatus('${alert.id}','cancelled')">Cancel</button>
+        </div>
+      </div>
+    `).join('') || '<div style="color:var(--muted);font-size:14px;">No active alerts.</div>';
+  }
+
+  window.markAlertStatus = async (alertId, status) => {
+    if (!alertId || !status) return;
+    try {
+      await updateDoc(doc(db, 'alerts', alertId), {
+        status,
+        active: false,
+        updatedAt: serverTimestamp()
+      });
+      showStatusModal(`Alert marked as ${status}.`);
+    } catch (e) {
+      console.error(e);
+      showStatusModal('Could not update alert status. Please try again.');
+    }
+  };
+
+  // Fix 4: AI Match for existing task (no UI change, function exposed on window)
+  window.runAITaskMatching = async (taskId) => {
+    if (!taskId) { console.warn('runAITaskMatching: taskId is required'); return []; }
+    try {
+      const taskSnap = await getDoc(doc(db, 'tasks', taskId));
+      if (!taskSnap.exists()) { console.warn('runAITaskMatching: task not found'); return []; }
+      const task = taskSnap.data() || {};
+      const taskCity = String(task.city || '').trim().toLowerCase();
+      const taskSkills = Array.isArray(task.skillsRequired)
+        ? task.skillsRequired.map(s => String(s).trim().toLowerCase()).filter(Boolean)
+        : [];
+
+      const volunteerProfiles = await ensureVolunteerCache();
+      const scored = [];
+      volunteerProfiles.forEach(p => {
+        const pSkills = (Array.isArray(p.skillsRequired) ? p.skillsRequired : Array.isArray(p.skills) ? p.skills : [])
+          .map(s => String(s).trim().toLowerCase()).filter(Boolean);
+        const cityMatch = taskCity && String(p.city || '').trim().toLowerCase() === taskCity;
+        const skillMatches = taskSkills.filter(s => pSkills.includes(s));
+        const score = (cityMatch ? 55 : 0) +
+          (taskSkills.length ? Math.round((skillMatches.length / taskSkills.length) * 35) : 0) +
+          (p.available === false ? -20 : 10) +
+          Math.min(10, Math.round((Number(p.points) || 0) / 100));
+        scored.push({ id: p.id, ...p, matchScore: Math.max(0, Math.min(100, score)), matchedSkills: skillMatches });
+      });
+
+      const topMatches = scored.sort((a, b) => b.matchScore - a.matchScore).slice(0, 5);
+      console.log('runAITaskMatching top matches for task', taskId, ':', topMatches);
+      return topMatches;
+    } catch (e) {
+      console.error('runAITaskMatching error:', e);
+      return [];
+    }
+  };
+
+  async function ensureVolunteerCache(force = false) {
+    if (!force && allVolunteers.length) return allVolunteers;
+
+    const volunteerSnap = await getDocs(query(collection(db, 'users'), where('role', '==', 'volunteer')));
+    allVolunteers = [];
+    volunteerSnap.forEach(d => allVolunteers.push({ id: d.id, ...d.data() }));
+    return allVolunteers;
+  }
+
+  // DEMO DATA (fallback if Firebase empty)
+  const DEMO_VOLS = [
+    { id:'v1', firstName:'Ravi',   lastName:'Kumar',  city:'Indore', points:220, tasksCompleted:4, available:true,  role:'volunteer' },
+    { id:'v2', firstName:'Priya',  lastName:'Sharma', city:'Bhopal', points:310, tasksCompleted:6, available:true,  role:'volunteer' },
+    { id:'v3', firstName:'Arjun',  lastName:'Mehta',  city:'Indore', points:150, tasksCompleted:3, available:false, role:'volunteer' },
+    { id:'v4', firstName:'Sneha',  lastName:'Patel',  city:'Pune',   points:480, tasksCompleted:9, available:true,  role:'volunteer' },
+    { id:'v5', firstName:'Rahul',  lastName:'Verma',  city:'Bhopal', points:90,  tasksCompleted:1, available:true,  role:'volunteer' },
+    { id:'v6', firstName:'Ananya', lastName:'Singh',  city:'Mumbai', points:260, tasksCompleted:5, available:true,  role:'volunteer' },
+    { id:'v7', firstName:'Vikram', lastName:'Das',    city:'Indore', points:190, tasksCompleted:3, available:false, role:'volunteer' },
+    { id:'v8', firstName:'Meera',  lastName:'Joshi',  city:'Pune',   points:340, tasksCompleted:7, available:true,  role:'volunteer' },
+  ];
+  const DEMO_TASKS = [
+    { id:'t1', title:'Medical Camp Assistance',    city:'Indore', urgency:'high',   volunteersNeeded:8,  volunteersAssigned:['a','b','c'] },
+    { id:'t2', title:'Teach at Community School',  city:'Bhopal', urgency:'medium', volunteersNeeded:4,  volunteersAssigned:['a'] },
+    { id:'t3', title:'Tree Plantation Drive',      city:'Pune',   urgency:'low',    volunteersNeeded:20, volunteersAssigned:Array(12).fill('x') },
+    { id:'t4', title:'Food Distribution Drive',    city:'Mumbai', urgency:'high',   volunteersNeeded:15, volunteersAssigned:Array(5).fill('x') },
+    { id:'t5', title:'Digital Literacy Workshop',  city:'Indore', urgency:'medium', volunteersNeeded:6,  volunteersAssigned:['a','b'] },
+  ];
+
+  // ── AUTH GUARD ──
+  function startAdminRealtime() {
+    adminUnsubs.forEach(unsub => { try { unsub(); } catch (e) {} });
+    adminUnsubs = [];
+
+    adminUnsubs.push(onSnapshot(collection(db, 'tasks'), (snap) => {
+      const fromDB = [];
+      snap.forEach(d => fromDB.push({ id: d.id, ...d.data() }));
+      allTasks = fromDB.length > 0 ? fromDB : DEMO_TASKS;
+      renderStats();
+      renderCityGrid();
+      renderTaskOverview();
+    }));
+
+    adminUnsubs.push(onSnapshot(collection(db, 'taskRequests'), (snap) => {
+      allTaskRequests = [];
+      snap.forEach(d => allTaskRequests.push({ id: d.id, ...d.data() }));
+      renderStats();
+    }));
+
+    adminUnsubs.push(onSnapshot(collection(db, 'assignments'), (snap) => {
+      allAssignments = [];
+      snap.forEach(d => allAssignments.push({ id: d.id, ...d.data() }));
+      renderStats();
+      renderTaskOverview();
+    }));
+
+    adminUnsubs.push(onSnapshot(collection(db, 'alerts'), (snap) => {
+      const alerts = [];
+      snap.forEach(d => alerts.push({ id: d.id, ...d.data() }));
+      alerts.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      handleIncomingAlert(alerts.find(alertItem => alertItem.active !== false) || null);
+      renderAlertsList(alerts);
+    }));
+
+    adminUnsubs.push(onSnapshot(collection(db, 'applications'), (snap) => {
+      allApplications = [];
+      snap.forEach(d => allApplications.push({ id: d.id, ...d.data() }));
+      renderApplications();
+    }));
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'auth.html'; return; }
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const p = snap.exists() ? snap.data() : {};
+
+    if (p.role !== 'ngo') {
+      window.location.href = 'dashboard.html';
+      return;
+    }
+
+    const initials = ((p.firstName||'A')[0]+(p.lastName||'')[0]).toUpperCase();
+    document.getElementById('ngoNav').style.display = 'flex';
+    document.getElementById('sidebarAv').textContent   = initials;
+    document.getElementById('sidebarName').textContent = `${p.firstName||''} ${p.lastName||''}`.trim();
+
+    try {
+      const volunteers = await ensureVolunteerCache(true);
+      allVolunteers = volunteers.length > 0 ? volunteers : DEMO_VOLS;
+    } catch(e) { allVolunteers = DEMO_VOLS; }
+
+    renderVolTable(allVolunteers);
+    startAdminRealtime();
+  });
+
+  function renderStats() {
+    const avail     = allVolunteers.filter(v => v.available).length;
+    const openTasks = allTasks.length;
+    const under = allTasks.filter(t => allAssignments.filter(a => a.taskId === t.id && a.status !== 'completed').length < (t.volunteersNeeded||1)).length;
+
+    document.getElementById('statVols').textContent   = allVolunteers.length;
+    document.getElementById('statAvail').textContent  = avail;
+    document.getElementById('statTasks').textContent  = openTasks;
+    document.getElementById('statUnder').textContent  = under;
+    document.getElementById('adminSub').textContent   = `${allVolunteers.length} volunteers · ${openTasks} open tasks · ${under} understaffed`;
+  }
+
+  function renderCityGrid() {
+    const cities = {};
+    allVolunteers.forEach(v => {
+      const c = v.city || 'Unknown';
+      if(!cities[c]) cities[c] = { total:0, available:0, tasks:0 };
+      cities[c].total++;
+      if(v.available) cities[c].available++;
+    });
+    allTasks.forEach(t => {
+      const c = t.city || 'Unknown';
+      if(!cities[c]) cities[c] = { total:0, available:0, tasks:0 };
+      cities[c].tasks++;
+    });
+
+    const html = Object.entries(cities).map(([city, d]) => {
+      const ratio = d.tasks > 0 ? d.available / d.tasks : 2;
+      const pct   = Math.min(100, Math.round((d.available / Math.max(d.tasks*2, 1)) * 100));
+      const statusClass = ratio >= 1.5 ? 'status-ok' : ratio >= 0.8 ? 'status-low' : 'status-critical';
+      const statusText  = ratio >= 1.5 ? '✅ Well Covered' : ratio >= 0.8 ? '⚠️ Low Coverage' : '🔴 Critical';
+      const barClass    = ratio >= 1.5 ? '' : ratio >= 0.8 ? 'warning' : 'danger';
+      return `
+        <div class="city-card">
+          <div class="city-name">📍 ${city}</div>
+          <div class="city-stat-row"><span class="city-stat-label">Volunteers</span><span class="city-stat-val">${d.available} available / ${d.total} total</span></div>
+          <div class="city-stat-row"><span class="city-stat-label">Open Tasks</span><span class="city-stat-val">${d.tasks}</span></div>
+          <div class="city-bar-wrap">
+            <div class="city-bar-label"><span>Coverage</span><span>${pct}%</span></div>
+            <div class="city-bar"><div class="city-bar-fill ${barClass}" style="width:${pct}%"></div></div>
+          </div>
+          <span class="city-status ${statusClass}">${statusText}</span>
+        </div>`;
+    }).join('');
+    document.getElementById('cityGrid').innerHTML = html || '<p style="color:var(--muted);font-size:14px;">No city data yet.</p>';
+  }
+
+  function renderTaskOverview() {
+    const html = allTasks.slice(0,6).map(t => {
+      const assigned = allAssignments.filter(a => a.taskId === t.id && a.status !== 'completed').length;
+      const needed   = t.volunteersNeeded || 1;
+      const pct      = Math.min(100, Math.round((assigned/needed)*100));
+      const barClass = pct >= 80 ? '' : pct >= 40 ? '' : 'danger';
+      const urgColor = t.urgency==='high' ? 'var(--danger)' : t.urgency==='medium' ? 'var(--warning)' : 'var(--accent)';
+      return `
+        <div class="tov-card">
+          <div class="tov-title">${t.title}</div>
+          <div class="tov-meta" style="color:${urgColor};">${t.urgency?.toUpperCase()||'OPEN'} · ${t.city}</div>
+          <div class="tov-progress"><div class="tov-fill ${barClass}" style="width:${pct}%"></div></div>
+          <div class="tov-nums"><span>${assigned} assigned</span><span>${needed} needed</span></div>
+        </div>`;
+    }).join('');
+    document.getElementById('taskOverview').innerHTML = html || '<p style="color:var(--muted);">No tasks yet.</p>';
+  }
+
+  let volTableData = [];
+  function renderVolTable(vols) {
+    volTableData = vols;
+    document.getElementById('volTableSub').textContent = `${vols.length} volunteers total · ${vols.filter(v=>v.available).length} available`;
+    const rows = vols.map(v => {
+      const initials = ((v.firstName||'U')[0]+(v.lastName||'')[0]).toUpperCase();
+      const statusClass = v.available ? 'pill-avail' : 'pill-busy';
+      const statusText  = v.available ? 'Available' : 'Busy';
+      const colors = ['#00C896','#7C5CFF','#F5A623','#E65C00','#00A8E8'];
+      const color  = colors[Math.abs(v.id?.charCodeAt(0)||0) % colors.length];
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:10px;"><div class="vol-av-sm" style="background:${color};color:#0A0F0D;">${initials}</div><div><div style="font-weight:700;">${v.firstName||''} ${v.lastName||''}</div></div></div></td>
+        <td style="color:var(--muted);">📍 ${v.city||'--'}</td>
+        <td style="font-weight:700;color:var(--accent);">${(v.points||0).toLocaleString()}</td>
+        <td style="color:var(--muted);">${v.tasksCompleted||0}</td>
+        <td><span class="status-pill ${statusClass}">${statusText}</span></td>
+        <td><button onclick="window.location.href='tasks.html'" style="padding:6px 14px;border-radius:7px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Assign Task</button></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('volTableBody').innerHTML = rows || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No volunteers yet.</td></tr>';
+  }
+
+  window.filterVols = (q) => {
+    const filtered = allVolunteers.filter(v =>
+      `${v.firstName} ${v.lastName} ${v.city}`.toLowerCase().includes(q.toLowerCase())
+    );
+    renderVolTable(filtered);
+  };
+
+  // ── GEMINI RESOURCE ALLOCATION ──
+  window.runAllocation = async () => {
+    const btn = document.getElementById('analyzeBtn');
+    btn.disabled = true; btn.textContent = 'Analysing...';
+    document.getElementById('aiThinking').classList.add('show');
+    document.getElementById('aiRecs').classList.remove('show');
+    document.getElementById('aiRecs').innerHTML = '';
+
+    const thinkMsgs = ['Gemini is mapping volunteers to tasks...','Analysing city coverage gaps...','Identifying understaffed regions...','Calculating optimal assignments...','Generating recommendations...'];
+    let i = 0;
+    const interval = setInterval(() => { document.getElementById('thinkText').textContent = thinkMsgs[i++ % thinkMsgs.length]; }, 900);
+
+    const volSummary  = allVolunteers.map(v => `${v.firstName} ${v.lastName||''} — City: ${v.city||'?'}, Available: ${v.available?'Yes':'No'}, Points: ${v.points||0}`).join('\n');
+    const taskSummary = allTasks.map(t => `"${t.title}" — City: ${t.city}, Urgency: ${t.urgency}, Needs: ${t.volunteersNeeded||1}, Assigned: ${(t.volunteersAssigned||[]).length}`).join('\n');
+
+    const prompt = `You are KarSeva's resource allocation planner.
+Your job is to produce practical, evidence-based recommendations from the exact volunteer and task data below.
+
+VOLUNTEERS:
+${volSummary}
+
+OPEN TASKS:
+${taskSummary}
+
+INSTRUCTIONS:
+- Focus on urgent understaffed tasks first.
+- Prefer same-city assignments before suggesting cross-city movement.
+- Mention specific volunteer names and task titles only when supported by the data.
+- Use points as a secondary confidence signal, not the main reason.
+- Avoid vague advice like "optimize better".
+- Every recommendation must be actionable for an NGO admin right now.
+- If data is thin, still make the best recommendation but stay conservative.
+
+Return EXACTLY 4 recommendations as a valid JSON array.
+Each object must contain:
+- "type": "critical", "optimize", or "suggest"
+- "title": short action title, max 8 words
+- "body": 2 concise sentences, specific and evidence-based
+- "action": short button label, max 4 words
+
+Return ONLY JSON. No markdown. No extra text.`;
+
+    try {
+            const res = await fetch('/api/gemini-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await res.json();
+      clearInterval(interval);
+      document.getElementById('aiThinking').classList.remove('show');
+
+      let recs = [];
+      try {
+        const raw = (data.text || '').trim();
+        const clean = raw.replace(/```json|```/g,'').trim();
+        recs = JSON.parse(clean);
+      //-----------------------------------------------------------------------------------------
+      } catch(e) {
+        console.warn('Gemini JSON parse failed — building recs from Firebase data:', e);
+        const understaffed = allTasks.filter(t => (t.volunteersAssigned||[]).length < (t.volunteersNeeded||1));
+        const available = allVolunteers.filter(v => v.available !== false);
+        const cities = [...new Set(allVolunteers.map(v => v.city).filter(Boolean))];
+        recs = understaffed.slice(0, 2).map(t => {
+          const cityVols = available.filter(v => v.city === t.city);
+          const names = cityVols.slice(0, 2).map(v => `${v.firstName} ${v.lastName||''}`.trim()).join(', ') || 'available volunteers';
+          const gap = (t.volunteersNeeded||1) - (t.volunteersAssigned||[]).length;
+          return { type: t.urgency === 'high' ? 'critical' : 'optimize', title: `${t.title} needs ${gap} more volunteer${gap!==1?'s':''}`, body: `"${t.title}" in ${t.city} requires ${gap} more volunteer${gap!==1?'s':''}. ${names ? names + ' are available in ' + t.city + ' and should be assigned.' : 'Check volunteer availability in ' + t.city + '.'}`, action: 'Assign Now' };
+        }).concat(
+          cities.slice(0, 2).map(city => {
+            const cityVols = available.filter(v => v.city === city);
+            const cityTasks = understaffed.filter(t => t.city === city);
+            const type = cityVols.length < cityTasks.length ? 'critical' : 'suggest';
+            return { type, title: `${city}: ${cityVols.length} available, ${cityTasks.length} tasks open`, body: `${city} has ${cityVols.length} available volunteer${cityVols.length!==1?'s':''} and ${cityTasks.length} understaffed task${cityTasks.length!==1?'s':''}. ${cityVols.length >= cityTasks.length ? 'Coverage looks sufficient — consider deploying surplus volunteers to high-need cities.' : 'Recruit or redirect more volunteers to this city urgently.'}`, action: cityVols.length >= cityTasks.length ? 'Redeploy' : 'Recruit' };
+          })
+        ).filter(Boolean);
+        if (!recs.length) recs = [{ type:'suggest', title:'All tasks are sufficiently staffed', body:`All ${allTasks.length} tasks currently have enough volunteers assigned. Monitor for new task requests and keep volunteers available.`, action:'Monitor' }];
+      }
+//-----------------------------------------------------------------------------------------------------------
+      const typeMap = { critical:'type-critical', optimize:'type-optimize', suggest:'type-suggest' };
+      const typeLabel = { critical:'🔴 Critical', optimize:'🟡 Optimise', suggest:'🟢 Suggestion' };
+      const cardClass = { critical:'urgent', optimize:'warning', suggest:'' };
+
+      document.getElementById('aiRecs').innerHTML = recs.map(r => `
+        <div class="ai-rec-card ${cardClass[r.type]||''}">
+          <div class="ai-rec-header">
+            <span class="ai-rec-type ${typeMap[r.type]||'type-suggest'}">${typeLabel[r.type]||'Suggestion'}</span>
+          </div>
+          <div class="ai-rec-title">${r.title}</div>
+          <div class="ai-rec-body">${r.body}</div>
+          <button class="ai-rec-action" onclick="this.textContent='✅ Done';this.disabled=true;">${r.action||'Take Action'}</button>
+        </div>`).join('');
+
+      document.getElementById('aiRecs').classList.add('show');
+    //--------------------------------------------------------------------------------------------------------------------------
+   } catch(e) {
+      clearInterval(interval);
+      document.getElementById('aiThinking').classList.remove('show');
+      console.warn('Gemini API unreachable — running local Firebase-based allocation:', e);
+      const understaffed = allTasks.filter(t => (t.volunteersAssigned||[]).length < (t.volunteersNeeded||1));
+      const available = allVolunteers.filter(v => v.available !== false);
+      const recs = understaffed.slice(0, 3).map(t => {
+        const cityVols = available.filter(v => v.city === t.city);
+        const gap = (t.volunteersNeeded||1) - (t.volunteersAssigned||[]).length;
+        const names = cityVols.slice(0,2).map(v=>`${v.firstName} ${v.lastName||''}`.trim()).join(', ') || 'no local volunteers found';
+        return { type: t.urgency==='high'?'critical':'optimize', title:`${t.title} — ${gap} volunteer${gap!==1?'s':''} needed`, body:`"${t.title}" in ${t.city} is understaffed by ${gap}. ${names !== 'no local volunteers found' ? names+' are available locally and should be assigned.' : 'No volunteers currently available in '+t.city+' — consider redirecting from nearby cities.'}`, action:'Assign Now' };
+      });
+      const fallbackRecs = recs.length ? recs : [{ type:'suggest', title:'No understaffed tasks found', body:'All current tasks appear to be sufficiently staffed. Continue monitoring for new requests.', action:'Monitor' }];
+      const typeMap = { critical:'type-critical', optimize:'type-optimize', suggest:'type-suggest' };
+      const typeLabel = { critical:'🔴 Critical', optimize:'🟡 Optimise', suggest:'🟢 Suggestion' };
+      const cardClass = { critical:'urgent', optimize:'warning', suggest:'' };
+      document.getElementById('aiRecs').innerHTML = fallbackRecs.map(r => `
+        <div class="ai-rec-card ${cardClass[r.type]||''}">
+          <div class="ai-rec-header"><span class="ai-rec-type ${typeMap[r.type]||'type-suggest'}">${typeLabel[r.type]||'Suggestion'}</span></div>
+          <div class="ai-rec-title">${r.title}</div>
+          <div class="ai-rec-body">${r.body}</div>
+          <button class="ai-rec-action" onclick="this.textContent='✅ Done';this.disabled=true;">${r.action||'Take Action'}</button>
+        </div>`).join('');
+      document.getElementById('aiRecs').classList.add('show');
+    }
+//-----------------------------------------------------------------------------------------------------------------
+    btn.disabled = false; btn.textContent = 'Run AI Allocation Analysis 🤖';
+  };
+
+  // EMERGENCY BROADCAST
+  window.sendBroadcast = async () => {
+    const msg  = document.getElementById('broadcastMsg').value.trim();
+    const city = document.getElementById('broadcastCity').value;
+    if (!msg) {
+      showStatusModal('Please type a message first.');
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'alerts'), {
+        message: msg,
+        city,
+        active: true,
+        createdAt: serverTimestamp()
+      });
+      document.getElementById('broadcastMsg').value = '';
+      showStatusModal(`Emergency alert sent to ${city}.`);
+    } catch (e) {
+      console.error(e);
+      showStatusModal('Could not send the emergency alert. Please try again.');
+    }
+  };
+
+  // theme
+ document.getElementById('themeBtn').addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = dark ? 'light' : 'dark';
+
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+
+  localStorage.setItem('ksTheme', next);
+});
+</script>
+
+<script>
+/* ── KARSEVA MAGIC DYNAMICS ── */
+(function(){
+  /* ── SCROLL REVEAL ── */
+  const style=document.createElement('style');
+  style.textContent=`
+    .ks-reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal.ks-in{opacity:1;transform:none;}
+    .ks-reveal-l{opacity:0;transform:translateX(-30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-l.ks-in{opacity:1;transform:none;}
+    .ks-reveal-r{opacity:0;transform:translateX(30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-r.ks-in{opacity:1;transform:none;}
+    @keyframes ks-shimmer{0%,100%{opacity:.55}50%{opacity:1}}
+    @keyframes ks-popIn{0%{opacity:0;transform:scale(.85) translateY(16px)}100%{opacity:1;transform:none}}
+    @keyframes ks-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes ks-pulse-ring{0%{box-shadow:0 0 0 0 rgba(0,200,150,.4)}70%{box-shadow:0 0 0 10px rgba(0,200,150,0)}100%{box-shadow:0 0 0 0 rgba(0,200,150,0)}}
+    @keyframes ks-spin{to{transform:rotate(360deg)}}
+    .ks-float{animation:ks-float 3.5s ease-in-out infinite;}
+    .ks-pulse{animation:ks-pulse-ring 2s ease-out infinite;}
+    .ks-pop{animation:ks-popIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+    /* card hover lift */
+    .stat-card,.section-card,.f-card,.task-card,.ngo-card,.badge-item,.lb-table-wrap,.bw-item,.podium-card,.city-card,.tov-card,.auth-box,.form-card,.ai-panel,.post-card,.community-card,.donate-card{transition-property:transform,border-color,box-shadow,background!important;transition-duration:.28s!important;}
+    .stat-card:hover,.section-card:hover,.task-card:hover,.ngo-card:hover,.badge-item:hover,.bw-item:hover,.podium-card:hover,.city-card:hover,.tov-card:hover,.community-card:hover,.donate-card:hover{transform:translateY(-4px)!important;box-shadow:0 12px 32px rgba(0,200,150,.1)!important;}
+    .badge-item:hover .badge-emoji{display:inline-block;animation:ks-float 1.2s ease-in-out infinite;}
+    /* button shimmer */
+    .btn-submit,.btn-hero,.btn-post,.btn-cta1,.btn-match,.match-assign-btn,.btn-dashboard,.em-btn,.ai-rec-action{position:relative;overflow:hidden;}
+    .btn-submit::after,.btn-hero::after,.btn-post::after,.btn-cta1::after,.btn-match::after,.match-assign-btn::after,.btn-dashboard::after,.em-btn::after,.ai-rec-action::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);transform:translateX(-200%);transition:transform .45s;}
+    .btn-submit:hover::after,.btn-hero:hover::after,.btn-post:hover::after,.btn-cta1:hover::after,.btn-match:hover::after,.match-assign-btn:hover::after,.btn-dashboard:hover::after,.em-btn:hover::after,.ai-rec-action:hover::after{transform:translateX(200%);}
+    /* nav item left-bar indicator */
+    .nav-item.active{border-left:3px solid var(--accent);padding-left:9px;transition:all .2s;}
+    /* input focus ring */
+    .form-input:focus,.lb-search:focus{box-shadow:0 0 0 3px rgba(0,200,150,.15)!important;}
+    /* progress bar */
+    #ks-progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:9999;width:0%;transition:width .1s linear;box-shadow:0 0 6px rgba(0,200,150,.6);}
+    /* ripple */
+    .ks-ripple{position:absolute;border-radius:50%;background:rgba(0,200,150,.25);transform:scale(0);animation:ks-rippleAnim .55s linear;pointer-events:none;}
+    @keyframes ks-rippleAnim{to{transform:scale(4);opacity:0;}}
+  `;
+  document.head.appendChild(style);
+
+  /* ── PROGRESS BAR ── */
+  const pb=document.createElement('div');pb.id='ks-progress';document.body.prepend(pb);
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement.scrollHeight-innerHeight;
+    if(h>0) pb.style.width=(scrollY/h*100)+'%';
+  });
+
+  /* ── SCROLL REVEAL OBSERVER ── */
+  // tag eligible elements
+  const selectors=['.stat-card','.section-card','.task-card','.task-item','.lb-row:not(.header)','.badge-item','.bw-item','.podium-card','.city-card','.tov-card','.ngo-card','.f-card','.step-card','.activity-item','.pstat','.match-card','.donate-card','.community-card','.post-card','.ai-rec-card','.form-card','.auth-box','.ai-panel'];
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('ks-in'),i*40);
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:.08});
+  setTimeout(()=>{
+    document.querySelectorAll(selectors.join(',')).forEach((el,i)=>{
+      el.classList.add('ks-reveal');
+      el.style.transitionDelay=(i%6)*0.04+'s';
+      obs.observe(el);
+    });
+  },100);
+
+  /* ── RIPPLE ON BUTTONS ── */
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('button');
+    if(!btn) return;
+    const r=btn.getBoundingClientRect(),sz=Math.max(r.width,r.height);
+    const rip=document.createElement('span');
+    rip.className='ks-ripple';
+    rip.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px`;
+    btn.appendChild(rip);
+    setTimeout(()=>rip.remove(),560);
+    // click sparks
+    for(let i=0;i<8;i++){
+      const s=document.createElement('div');
+      const a=Math.random()*Math.PI*2,d=20+Math.random()*35;
+      s.style.cssText=`position:fixed;pointer-events:none;z-index:9997;width:4px;height:4px;border-radius:50%;background:var(--accent);left:${e.clientX}px;top:${e.clientY}px;transform:translate(-50%,-50%);transition:all .5s cubic-bezier(.1,.8,.2,1)`;
+      document.body.appendChild(s);
+      requestAnimationFrame(()=>{s.style.transform=`translate(${Math.cos(a)*d-2}px,${Math.sin(a)*d-2}px)`;s.style.opacity='0';s.style.width='2px';s.style.height='2px';});
+      setTimeout(()=>s.remove(),510);
+    }
+  });
+
+  /* ── TILT CARDS ── */
+  document.querySelectorAll('.stat-card,.badge-item,.podium-card,.city-card,.f-card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`translateY(-4px) rotateX(${-y*6}deg) rotateY(${x*6}deg)`;
+      card.style.transformStyle='preserve-3d';
+    });
+    card.addEventListener('mouseleave',()=>{card.style.transform='';});
+  });
+
+  /* ── COUNTER ANIMATION ── */
+  function animateCounter(el,target,suffix){
+    let start=null,orig=el.textContent;
+    const fmt=n=>n.toLocaleString()+suffix;
+    const step=ts=>{
+      if(!start)start=ts;
+      const p=Math.min((ts-start)/1400,1),ease=1-Math.pow(1-p,3);
+      el.textContent=fmt(Math.round(ease*target));
+      if(p<1)requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  const cObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const el=e.target;
+      const raw=el.textContent.replace(/,/g,'');
+      const num=parseFloat(raw);
+      const suffix=raw.replace(/[\d.]/g,'').replace(num.toString().replace(/,/g,''),'');
+      if(!isNaN(num)&&num>10)animateCounter(el,num,suffix);
+      cObs.unobserve(el);
+    });
+  },{threshold:.5});
+  document.querySelectorAll('.stat-card-num,.stat-num,.podium-pts,.lb-pts,.lb-pts-val,.yrb-pts,.pstat-num').forEach(el=>cObs.observe(el));
+
+  /* ── SIDEBAR NAV SLIDE ── */
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('mouseenter',()=>{item.style.paddingLeft='16px';});
+    item.addEventListener('mouseleave',()=>{if(!item.classList.contains('active'))item.style.paddingLeft='';});
+  });
+
+  /* ── INPUT FOCUS LABELS ── */
+  document.querySelectorAll('.form-input').forEach(inp=>{
+    inp.addEventListener('focus',()=>{inp.style.background='var(--surface)';});
+    inp.addEventListener('blur',()=>{inp.style.background='';});
+  });
+
+  /* ── THEME TOGGLE SPIN ── */
+  const tBtn=document.getElementById('themeBtn');
+  if(tBtn){
+    tBtn.addEventListener('click',()=>{
+      tBtn.style.transform='rotate(360deg)';
+      tBtn.style.transition='transform .4s cubic-bezier(.34,1.56,.64,1)';
+      setTimeout(()=>{tBtn.style.transform='';},420);
+    });
+  }
+
+  /* ── STAT CARD ACCENT BAR ── */
+  document.querySelectorAll('.stat-card').forEach(c=>{
+    const bar=document.createElement('div');
+    bar.style.cssText='position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);border-radius:0 0 14px 14px;transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.77,0,.18,1);';
+    c.style.position='relative';c.style.overflow='hidden';
+    c.appendChild(bar);
+    c.addEventListener('mouseenter',()=>{bar.style.transform='scaleX(1)';});
+    c.addEventListener('mouseleave',()=>{bar.style.transform='scaleX(0)';});
+  });
+
+  /* ── BADGE FLOAT ON HOVER ── */
+  document.querySelectorAll('.badge-emoji,.pb,.bw-emoji').forEach(em=>{
+    em.addEventListener('mouseenter',()=>{em.style.animation='ks-float 1s ease-in-out infinite';em.style.display='inline-block';});
+    em.addEventListener('mouseleave',()=>{em.style.animation='';});
+  });
+
+  /* ── AVATAR PULSE ON HOVER ── */
+  document.querySelectorAll('.user-av,.lb-av,.ngo-av,.match-av,.podium-av,.yrb-av').forEach(av=>{
+    av.addEventListener('mouseenter',()=>{av.style.animation='ks-pulse-ring 1s ease-out infinite';});
+    av.addEventListener('mouseleave',()=>{av.style.animation='';});
+  });
+
+  /* ── EMERGENCY BANNER ATTENTION SHAKE ── */
+  const em=document.getElementById('emergencyBanner');
+  if(em&&!em.classList.contains('hidden')){
+    const shakeStyle=document.createElement('style');
+    shakeStyle.textContent='@keyframes ks-shake{0%,100%{transform:none}10%,30%,50%,70%,90%{transform:translateX(-4px)}20%,40%,60%,80%{transform:translateX(4px)}}';
+    document.head.appendChild(shakeStyle);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},1200);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},5000);
+  }
+
+  /* ── LB ROW HOVER RANK HIGHLIGHT ── */
+  document.querySelectorAll('.lb-row:not(.header):not(.you)').forEach(row=>{
+    row.addEventListener('mouseenter',()=>{row.style.background='var(--surface2)';row.style.paddingLeft='28px';row.style.transition='all .2s';});
+    row.addEventListener('mouseleave',()=>{row.style.background='';row.style.paddingLeft='';});
+  });
+
+  /* ── PODIUM CROWN FLOAT ── */
+  document.querySelectorAll('.podium-crown').forEach(c=>{
+    c.style.display='inline-block';c.style.animation='ks-float 2.5s ease-in-out infinite';
+    c.style.animationDelay=Math.random()*.8+'s';
+  });
+
+  /* ── BLINK DOT PULSE ── */
+  document.querySelectorAll('.em-dot,.badge-dot,.ai-dot,.tag-dot').forEach(dot=>{
+    dot.style.boxShadow='0 0 0 0 rgba(0,200,150,.4)';
+    dot.style.animation='blink 2s infinite, ks-pulse-ring 2s ease-out infinite';
+  });
+
+  /* ── TASK CARD URGENCY PULSE ── */
+  document.querySelectorAll('.task-status.urgent,.urgency.high').forEach(el=>{
+    el.style.animation='ks-shimmer 1.6s ease-in-out infinite';
+  });
+
+  /* ── PAGE ENTRY FADE ── */
+  document.body.style.opacity='0';
+  document.body.style.transition='opacity .4s ease';
+  window.addEventListener('load',()=>{document.body.style.opacity='1';});
+
+  /* ── SMOOTH LINK TRANSITIONS ── */
+  document.querySelectorAll('[onclick*="location.href"],[onclick*="window.location"]').forEach(el=>{
+    el.addEventListener('click',e=>{
+      e.preventDefault();
+      const match=el.getAttribute('onclick').match(/href='([^']+)'/);
+      if(match){
+        document.body.style.opacity='0';
+        setTimeout(()=>{window.location.href=match[1];},300);
+      }
+    });
+  });
+
+})();
+</script>
+
+<style>
+/* admin specific */
+/* city cards stagger */
+.city-card{animation:ks-popIn .5s both;}
+/* city bar fill animate */
+.city-bar-fill{transition:width .9s cubic-bezier(.34,1.2,.64,1)!important;}
+/* task overview fill animate */
+.tov-fill{transition:width .9s cubic-bezier(.34,1.2,.64,1)!important;}
+/* table row hover */
+#volTableBody tr{transition:background .15s,padding-left .15s;}
+#volTableBody tr:hover{background:var(--surface2)!important;cursor:pointer;}
+/* AI recs entrance */
+.ai-rec-card{animation:ks-popIn .5s both;}
+/* analyze button glow */
+#analyzeBtn{transition:all .25s;box-shadow:0 0 0 0 rgba(0,200,150,.4);}
+#analyzeBtn:hover{box-shadow:0 0 0 6px rgba(0,200,150,.15),0 4px 20px rgba(0,200,150,.2);}
+/* critical cards pulse */
+.ai-rec-card.urgent{animation:criticalPulse 2.5s ease-in-out infinite!important;}
+@keyframes criticalPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.2)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+/* search input */
+input[oninput*="filterVols"]{transition:all .2s;}
+input[oninput*="filterVols"]:focus{box-shadow:0 0 0 3px rgba(0,200,150,.15)!important;outline:none;}
+/* broadcast area */
+textarea#broadcastMsg:focus{box-shadow:0 0 0 3px rgba(0,200,150,.15)!important;outline:none;}
+/* stat card icon float */
+.stat-card:hover .stat-card-icon{animation:ks-float 1s ease-in-out infinite;display:inline-block;}
+</style>
+<script>
+(function(){
+  /* animate city bar fills after they appear */
+  const barObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const fills=e.target.querySelectorAll('.city-bar-fill,.tov-fill');
+      fills.forEach(f=>{
+        const w=f.style.width;f.style.width='0%';
+        setTimeout(()=>{f.style.width=w;},100);
+      });
+      barObs.unobserve(e.target);
+    });
+  },{threshold:.2});
+  document.querySelectorAll('#cityGrid,#taskOverview').forEach(el=>barObs.observe(el));
+
+  /* vol table row stagger */
+  const tObs=new MutationObserver(()=>{
+    document.querySelectorAll('#volTableBody tr').forEach((r,i)=>{
+      if(r.dataset.animated)return;
+      r.dataset.animated='1';
+      r.style.opacity='0';r.style.transform='translateX(-8px)';
+      r.style.transition=`opacity .35s ${i*.04}s ease,transform .35s ${i*.04}s ease`;
+      setTimeout(()=>{r.style.opacity='1';r.style.transform='none';},50+i*40);
+    });
+  });
+  const tb=document.getElementById('volTableBody');
+  if(tb)tObs.observe(tb,{childList:true});
+
+  /* ai recs stagger */
+  const rObs=new MutationObserver(()=>{
+    document.querySelectorAll('.ai-rec-card').forEach((c,i)=>{
+      c.style.animationDelay=i*.1+'s';
+    });
+  });
+  const recs=document.getElementById('aiRecs');
+  if(recs)rObs.observe(recs,{childList:true});
+})();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+

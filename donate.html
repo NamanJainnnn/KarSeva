@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <script>
+  (function(){
+    const t = localStorage.getItem('ksTheme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KarSeva — Donate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+    [data-theme="dark"]{
+      --bg:#0A0F0D;--surface:#111714;--surface2:#182018;--border:#1E2B22;
+      --accent:#00C896;--accent-dim:rgba(0,200,150,.12);--accent-border:rgba(0,200,150,.28);
+      --text:#F0FFF8;--muted:#7A9E8A;--danger:#EF4444;--danger-dim:rgba(239,68,68,.1);
+      --warning:#F5A623;--warning-dim:rgba(245,166,35,.12);--gold:#F5A623;
+    }
+    [data-theme="light"]{
+      --bg:#F2FCF7;--surface:#FFFFFF;--surface2:#E8F5EE;--border:#C8E6D6;
+      --accent:#009E72;--accent-dim:rgba(0,158,114,.10);--accent-border:rgba(0,158,114,.32);
+      --text:#071A0F;--muted:#3D7A58;--danger:#DC2626;--danger-dim:rgba(220,38,38,.08);
+      --warning:#D97706;--warning-dim:rgba(217,119,6,.1);--gold:#D97706;
+    }
+
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;transition:background .35s,color .35s;}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;z-index:100;transition:background .35s;}
+    .sidebar-logo{font-size:20px;font-weight:800;letter-spacing:-.02em;padding:0 12px;margin-bottom:32px;}
+    .sidebar-logo span{color:var(--accent);}
+    .nav-section-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 12px;margin-bottom:8px;margin-top:20px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .2s,color .2s;margin-bottom:2px;}
+    .nav-item:hover{background:var(--surface2);color:var(--text);}
+    .nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:700;}
+    .nav-icon{font-size:17px;width:20px;text-align:center;}
+    .sidebar-bottom{margin-top:auto;}
+    .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);}
+    .user-av{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .user-name{font-size:13px;font-weight:700;}
+    .user-role{font-size:11px;color:var(--muted);}
+
+    /* MAIN */
+    .main{margin-left:240px;padding:32px;min-height:100vh;}
+
+    /* TOPBAR */
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+    .topbar h1{font-size:22px;font-weight:800;letter-spacing:-.01em;}
+    .topbar p{font-size:14px;color:var(--muted);margin-top:2px;}
+    .theme-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+    .theme-toggle:hover{border-color:var(--accent);}
+
+    /* HERO BANNER */
+    .donate-hero{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;margin-bottom:28px;position:relative;overflow:hidden;transition:background .35s;}
+    .donate-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#00A8E8,var(--accent));background-size:200%;animation:shimmer 2s linear infinite;}
+    @keyframes shimmer{0%{background-position:200%;}100%{background-position:-200%;}}
+    .donate-hero-deco{position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-size:120px;opacity:.06;pointer-events:none;}
+    .donate-hero h2{font-size:clamp(24px,3vw,36px);font-weight:800;line-height:1.15;margin-bottom:12px;max-width:500px;}
+    .donate-hero h2 span{color:var(--accent);}
+    .donate-hero p{font-size:15px;color:var(--muted);max-width:480px;line-height:1.7;margin-bottom:24px;}
+    .hero-stats{display:flex;gap:32px;flex-wrap:wrap;}
+    .hstat{text-align:left;}
+    .hstat-num{font-size:24px;font-weight:800;color:var(--accent);}
+    .hstat-label{font-size:12px;color:var(--muted);}
+
+    /* IMPACT STATS */
+    .impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+    .impact-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:border-color .2s,background .35s;}
+    .impact-card:hover{border-color:var(--accent);}
+    .impact-icon{font-size:28px;margin-bottom:8px;}
+    .impact-num{font-size:26px;font-weight:800;color:var(--accent);}
+    .impact-label{font-size:12px;color:var(--muted);margin-top:4px;}
+
+    /* MAIN GRID */
+    .donate-grid{display:grid;grid-template-columns:1fr 380px;gap:20px;}
+
+    /* CAMPAIGNS */
+    .section-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;transition:background .35s;}
+    .section-card:last-child{margin-bottom:0;}
+    .sc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .sc-title{font-size:16px;font-weight:800;}
+    .sc-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+
+    .campaign-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;transition:border-color .2s,transform .2s;}
+    .campaign-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+    .campaign-card:last-child{margin-bottom:0;}
+    .campaign-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;}
+    .campaign-icon{width:48px;height:48px;border-radius:12px;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+    .campaign-title{font-size:15px;font-weight:800;margin-bottom:4px;}
+    .campaign-ngo{font-size:12px;color:var(--accent);font-weight:600;}
+    .campaign-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+    .campaign-right{margin-left:auto;text-align:right;}
+    .campaign-urgent{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,.3);}
+    .campaign-goal{font-size:13px;font-weight:800;color:var(--text);margin-top:6px;}
+    .campaign-goal span{color:var(--muted);font-weight:400;}
+
+    .progress-wrap{margin-bottom:12px;}
+    .progress-labels{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+    .progress-raised{font-weight:800;color:var(--accent);}
+    .progress-goal{color:var(--muted);}
+    .progress-bar{height:8px;border-radius:99px;background:var(--border);overflow:hidden;}
+    .progress-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .8s ease;}
+    .progress-fill.urgent{background:var(--danger);}
+
+    .campaign-footer{display:flex;align-items:center;justify-content:space-between;}
+    .campaign-donors{font-size:12px;color:var(--muted);}
+    .campaign-donors b{color:var(--text);}
+    .btn-donate-campaign{padding:9px 20px;border-radius:9px;background:var(--accent);color:#0A0F0D;font-size:13px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;transition:opacity .2s;}
+    .btn-donate-campaign:hover{opacity:.88;}
+
+    /* DONATION FORM */
+    .donate-form-card{background:var(--surface);border:1px solid var(--accent-border);border-radius:16px;padding:24px;position:sticky;top:24px;transition:background .35s;}
+    .form-title{font-size:18px;font-weight:800;margin-bottom:4px;}
+    .form-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+
+    .amount-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+    .amount-btn{padding:12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:14px;font-weight:800;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;text-align:center;}
+    .amount-btn:hover{border-color:var(--accent);background:var(--accent-dim);}
+    .amount-btn.selected{background:var(--accent);color:#0A0F0D;border-color:var(--accent);}
+    .amount-btn.custom{font-weight:500;font-size:13px;}
+
+    .form-group{margin-bottom:16px;}
+    .form-label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:7px;}
+    .form-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:var(--accent);}
+    .form-input::placeholder{color:var(--muted);}
+
+    .cause-select{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+    .cause-chip{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;text-align:center;}
+    .cause-chip:hover{border-color:var(--accent);color:var(--accent);}
+    .cause-chip.selected{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+
+    .btn-donate-now{width:100%;padding:14px;border-radius:10px;background:var(--accent);color:#0A0F0D;font-size:16px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;transition:opacity .2s,transform .15s;margin-top:4px;}
+    .btn-donate-now:hover{opacity:.88;transform:translateY(-1px);}
+    .btn-donate-now:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+    .secure-note{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);margin-top:12px;}
+
+    /* DONORS LEADERBOARD */
+    .donor-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+    .donor-row:last-child{border-bottom:none;}
+    .donor-rank{font-size:16px;width:24px;text-align:center;}
+    .donor-av{width:34px;height:34px;border-radius:9px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .donor-name{font-size:14px;font-weight:700;flex:1;}
+    .donor-amount{font-size:14px;font-weight:800;color:var(--accent);}
+    .donor-anon{font-size:13px;color:var(--muted);font-style:italic;flex:1;}
+
+    /* SUCCESS MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:center;justify-content:center;}
+    .modal-overlay.show{display:flex;}
+    .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;max-width:400px;width:90%;text-align:center;}
+    .modal-icon{font-size:56px;margin-bottom:16px;}
+    .modal-title{font-size:22px;font-weight:800;margin-bottom:8px;}
+    .modal-sub{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.6;}
+    .btn-modal-close{padding:12px 32px;border-radius:10px;background:var(--accent);color:#0A0F0D;font-size:15px;font-weight:800;font-family:'Inter',sans-serif;border:none;cursor:pointer;}
+
+    @media(max-width:1100px){.donate-grid{grid-template-columns:1fr;}.donate-form-card{position:static;}}
+    @media(max-width:900px){.sidebar{display:none;}.main{margin-left:0;padding:20px;}.impact-grid{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">Kar<span>Seva</span></div>
+  <div class="nav-section-label">Main</div>
+  <div class="nav-item" onclick="location.href='dashboard.html'"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="location.href='tasks.html'"><span class="nav-icon">✅</span> Tasks</div>
+  <div class="nav-item" onclick="location.href='community.html'"><span class="nav-icon">👥</span> Community</div>
+  <div class="nav-item" onclick="location.href='leaderboard.html'"><span class="nav-icon">🏅</span> Leaderboard</div>
+  <div class="nav-item active"><span class="nav-icon">❤️</span> Donate</div>
+  <div class="nav-item" id="adminNav" style="display:none;" onclick="location.href='admin.html'"><span class="nav-icon">🧠</span> Admin Panel</div>
+  <div class="nav-section-label">Account</div>
+  <div class="nav-item" onclick="location.href='PROFILE.html'"><span class="nav-icon">👤</span> My Profile</div>
+  <div class="nav-item" onclick="location.href='settings.html'"><span class="nav-icon">⚙️</span> Settings</div>
+  <div class="nav-item" id="myNgoTab" style="display:none;" onclick="location.href='ngoprofile.html'">
+  <span class="nav-icon">🏛️</span> My NGO
+</div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-av" id="sidebarAv">--</div>
+      <div>
+        <div class="user-name" id="sidebarName">Loading...</div>
+        <div class="user-role" id="sidebarRole">Volunteer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>❤️ Donate</h1>
+      <p>Every rupee goes directly to verified NGOs on KarSeva</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn">🌙</button>
+  </div>
+
+  <!-- HERO -->
+  <div class="donate-hero">
+    <div class="donate-hero-deco">❤️</div>
+    <h2>Your donation <span>changes lives</span> across India</h2>
+    <p>100% of your donation goes directly to verified NGOs. No middlemen, no hidden fees. Every rupee is tracked and reported back to you.</p>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-num">₹48.2L</div><div class="hstat-label">Total raised on KarSeva</div></div>
+      <div class="hstat"><div class="hstat-num">1,240</div><div class="hstat-label">Donors this month</div></div>
+      <div class="hstat"><div class="hstat-num">38</div><div class="hstat-label">NGOs supported</div></div>
+      <div class="hstat"><div class="hstat-num">100%</div><div class="hstat-label">Reaches the cause</div></div>
+    </div>
+  </div>
+
+  <!-- IMPACT STATS -->
+  <div class="impact-grid">
+    <div class="impact-card">
+      <div class="impact-icon">🍳</div>
+      <div class="impact-num">₹500</div>
+      <div class="impact-label">feeds 10 people for a day</div>
+    </div>
+    <div class="impact-card">
+      <div class="impact-icon">📚</div>
+      <div class="impact-num">₹1,000</div>
+      <div class="impact-label">sponsors 1 child's education for a month</div>
+    </div>
+    <div class="impact-card">
+      <div class="impact-icon">🏥</div>
+      <div class="impact-num">₹2,000</div>
+      <div class="impact-label">funds a medical camp for 20 patients</div>
+    </div>
+    <div class="impact-card">
+      <div class="impact-icon">🌱</div>
+      <div class="impact-num">₹5,000</div>
+      <div class="impact-label">plants 100 trees with full care</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="donate-grid">
+
+    <!-- LEFT: CAMPAIGNS + DONORS -->
+    <div>
+      <!-- ACTIVE CAMPAIGNS -->
+      <div class="section-card">
+        <div class="sc-header">
+          <div>
+            <div class="sc-title">🔥 Active Campaigns</div>
+            <div class="sc-sub">Verified NGO campaigns needing support right now</div>
+          </div>
+        </div>
+
+        <div class="campaign-card">
+          <div class="campaign-top">
+            <div class="campaign-icon">🚨</div>
+            <div style="flex:1;">
+              <div class="campaign-title">Flood Relief — Indore Emergency Fund</div>
+              <div class="campaign-ngo">HelpFirst India · Indore, MP</div>
+            </div>
+            <div class="campaign-right">
+              <span class="campaign-urgent">🔴 Urgent</span>
+              <div class="campaign-goal">₹5,00,000 <span>goal</span></div>
+            </div>
+          </div>
+          <div class="campaign-desc">Flash floods have displaced 2,000 families in Indore's eastern districts. We need funds for emergency food kits, temporary shelter, and medical supplies. Every rupee reaches affected families within 24 hours.</div>
+          <div class="progress-wrap">
+            <div class="progress-labels"><span class="progress-raised">₹3,24,800 raised</span><span class="progress-goal">65% of ₹5,00,000</span></div>
+            <div class="progress-bar"><div class="progress-fill urgent" style="width:65%"></div></div>
+          </div>
+          <div class="campaign-footer">
+            <div class="campaign-donors"><b>842</b> donors · 12 days left</div>
+            <button class="btn-donate-campaign" onclick="selectCampaign('Flood Relief — Indore Emergency Fund')">Donate →</button>
+          </div>
+        </div>
+
+        <div class="campaign-card">
+          <div class="campaign-top">
+            <div class="campaign-icon">📚</div>
+            <div style="flex:1;">
+              <div class="campaign-title">Build 3 Community Libraries in Bhopal</div>
+              <div class="campaign-ngo">Seva Sangam · Bhopal, MP</div>
+            </div>
+            <div class="campaign-right">
+              <div class="campaign-goal">₹2,00,000 <span>goal</span></div>
+            </div>
+          </div>
+          <div class="campaign-desc">We're building 3 free community libraries in underserved Bhopal neighbourhoods. Each library will serve 500+ children with books, study space, and digital learning resources.</div>
+          <div class="progress-wrap">
+            <div class="progress-labels"><span class="progress-raised">₹1,42,000 raised</span><span class="progress-goal">71% of ₹2,00,000</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:71%"></div></div>
+          </div>
+          <div class="campaign-footer">
+            <div class="campaign-donors"><b>421</b> donors · 28 days left</div>
+            <button class="btn-donate-campaign" onclick="selectCampaign('Build 3 Community Libraries in Bhopal')">Donate →</button>
+          </div>
+        </div>
+
+        <div class="campaign-card">
+          <div class="campaign-top">
+            <div class="campaign-icon">🌱</div>
+            <div style="flex:1;">
+              <div class="campaign-title">Plant 10,000 Trees Across MP</div>
+              <div class="campaign-ngo">Green Roots · Pune, MH</div>
+            </div>
+            <div class="campaign-right">
+              <div class="campaign-goal">₹1,00,000 <span>goal</span></div>
+            </div>
+          </div>
+          <div class="campaign-desc">Our mission to plant 10,000 native trees across Madhya Pradesh this monsoon season. Each ₹10 plants one tree — we handle planting, watering, and 2-year care.</div>
+          <div class="progress-wrap">
+            <div class="progress-labels"><span class="progress-raised">₹38,500 raised</span><span class="progress-goal">38% of ₹1,00,000</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:38%"></div></div>
+          </div>
+          <div class="campaign-footer">
+            <div class="campaign-donors"><b>193</b> donors · 45 days left</div>
+            <button class="btn-donate-campaign" onclick="selectCampaign('Plant 10,000 Trees Across MP')">Donate →</button>
+          </div>
+        </div>
+
+        <div class="campaign-card">
+          <div class="campaign-top">
+            <div class="campaign-icon">🍳</div>
+            <div style="flex:1;">
+              <div class="campaign-title">1 Million Meals for Mumbai's Homeless</div>
+              <div class="campaign-ngo">Raftaar Parivar · Mumbai, MH</div>
+            </div>
+            <div class="campaign-right">
+              <div class="campaign-goal">₹10,00,000 <span>goal</span></div>
+            </div>
+          </div>
+          <div class="campaign-desc">Our community kitchen serves 500 hot meals daily to Mumbai's homeless population. Help us reach 1 million meals by year end. ₹50 feeds one person for a full day.</div>
+          <div class="progress-wrap">
+            <div class="progress-labels"><span class="progress-raised">₹6,80,000 raised</span><span class="progress-goal">68% of ₹10,00,000</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:68%"></div></div>
+          </div>
+          <div class="campaign-footer">
+            <div class="campaign-donors"><b>1,240</b> donors · 60 days left</div>
+            <button class="btn-donate-campaign" onclick="selectCampaign('1 Million Meals for Mumbai\'s Homeless')">Donate →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP DONORS LEADERBOARD -->
+      <div class="section-card">
+        <div class="sc-header">
+          <div class="sc-title">🏆 Top Donors This Month</div>
+        </div>
+        <div class="donor-row">
+          <div class="donor-rank">🥇</div>
+          <div class="donor-av" style="background:#F5A623;color:#0A0F0D;">RK</div>
+          <div class="donor-name">Rajesh Kumar</div>
+          <div class="donor-amount">₹25,000</div>
+        </div>
+        <div class="donor-row">
+          <div class="donor-rank">🥈</div>
+          <div class="donor-av" style="background:#A8B8C8;color:#0A0F0D;">SP</div>
+          <div class="donor-name">Sunita Patel</div>
+          <div class="donor-amount">₹18,500</div>
+        </div>
+        <div class="donor-row">
+          <div class="donor-rank">🥉</div>
+          <div class="donor-av" style="background:#CD7F32;color:#fff;">AM</div>
+          <div class="donor-name">Amit Mehta</div>
+          <div class="donor-amount">₹12,000</div>
+        </div>
+        <div class="donor-row">
+          <div class="donor-rank">4</div>
+          <div class="donor-av" style="background:#7C5CFF;color:#fff;">??</div>
+          <div class="donor-anon">Anonymous donor</div>
+          <div class="donor-amount">₹10,000</div>
+        </div>
+        <div class="donor-row">
+          <div class="donor-rank">5</div>
+          <div class="donor-av" style="background:#00C896;color:#0A0F0D;">NK</div>
+          <div class="donor-name">Neha Kapoor</div>
+          <div class="donor-amount">₹8,200</div>
+        </div>
+        <div class="donor-row">
+          <div class="donor-rank">6</div>
+          <div class="donor-av" style="background:#E65C00;color:#fff;">VD</div>
+          <div class="donor-name">Vikram Das</div>
+          <div class="donor-amount">₹5,500</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: DONATION FORM -->
+    <div>
+      <div class="donate-form-card">
+        <div class="form-title">Make a Donation ❤️</div>
+        <div class="form-sub" id="formSub">Supporting all verified NGOs on KarSeva</div>
+
+        <!-- AMOUNT SELECTOR -->
+        <div class="form-label">Choose amount</div>
+        <div class="amount-grid">
+          <button class="amount-btn" onclick="selectAmount(this, 100)">₹100</button>
+          <button class="amount-btn selected" onclick="selectAmount(this, 500)">₹500</button>
+          <button class="amount-btn" onclick="selectAmount(this, 1000)">₹1,000</button>
+          <button class="amount-btn" onclick="selectAmount(this, 2000)">₹2,000</button>
+          <button class="amount-btn" onclick="selectAmount(this, 5000)">₹5,000</button>
+          <button class="amount-btn custom" onclick="selectAmount(this, 0)">Custom ✏️</button>
+        </div>
+
+        <div class="form-group" id="customAmountGroup" style="display:none;">
+          <label class="form-label">Enter amount (₹)</label>
+          <input class="form-input" type="number" id="customAmount" placeholder="e.g. 3000" min="1"/>
+        </div>
+
+        <!-- CAUSE -->
+        <div class="form-label" style="margin-bottom:8px;">Choose cause</div>
+        <div class="cause-select">
+          <button class="cause-chip selected" onclick="selectCause(this)">🚨 Emergency Relief</button>
+          <button class="cause-chip" onclick="selectCause(this)">📚 Education</button>
+          <button class="cause-chip" onclick="selectCause(this)">🌱 Environment</button>
+          <button class="cause-chip" onclick="selectCause(this)">🍳 Food & Hunger</button>
+          <button class="cause-chip" onclick="selectCause(this)">🏥 Healthcare</button>
+          <button class="cause-chip" onclick="selectCause(this)">💡 Any Cause</button>
+        </div>
+
+        <!-- DONOR INFO -->
+        <div class="form-group">
+          <label class="form-label">Your name</label>
+          <input class="form-input" type="text" id="donorName" placeholder="Ravi Kumar"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email (for receipt)</label>
+          <input class="form-input" type="email" id="donorEmail" placeholder="you@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message (optional)</label>
+          <input class="form-input" type="text" id="donorMsg" placeholder="Keep up the great work!"/>
+        </div>
+
+        <!-- ANONYMOUS TOGGLE -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <input type="checkbox" id="anonToggle" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;"/>
+          <label for="anonToggle" style="font-size:13px;color:var(--muted);cursor:pointer;">Donate anonymously</label>
+        </div>
+
+        <button class="btn-donate-now" id="donateBtn" onclick="submitDonation()">Donate ₹500 Now ❤️</button>
+
+        <div class="secure-note">🔒 100% secure · No hidden charges · Tax receipt provided</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-box">
+    <div class="modal-icon">🎉</div>
+    <div class="modal-title">Thank you for donating!</div>
+    <div class="modal-sub" id="modalMsg">Your donation of ₹500 has been received. A receipt has been sent to your email. You're making a real difference!</div>
+    <button class="btn-modal-close" onclick="closeModal()">Back to KarSeva</button>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBM1zpNgjrztamRcvRJlJZxZhUrHqx6xTo",
+    authDomain: "karseva-1fb4f.firebaseapp.com",
+    projectId: "karseva-1fb4f",
+    storageBucket: "karseva-1fb4f.firebasestorage.app",
+    messagingSenderId: "4741841467",
+    appId: "1:4741841467:web:780939d385e60af936521e"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let selectedAmount = 500;
+  let currentProfile = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'auth.html'; return; }
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    currentProfile = snap.exists() ? snap.data() : {};
+    const p = currentProfile;
+    const initials = ((p.firstName||'U')[0]+(p.lastName||'')[0]).toUpperCase();
+    document.getElementById('sidebarAv').textContent   = initials;
+    document.getElementById('sidebarName').textContent = `${p.firstName||''} ${p.lastName||''}`.trim();
+    document.getElementById('sidebarRole').textContent = p.role === 'ngo' ? 'NGO Admin' : 'Volunteer';
+    if (p.role === 'ngo') document.getElementById('adminNav').style.display = 'flex';
+    const ngoTab = document.getElementById('myNgoTab');
+    if (ngoTab) ngoTab.style.display = p.role === 'ngo' ? 'flex' : 'none';
+    // prefill name and email
+    if (p.firstName) document.getElementById('donorName').value  = `${p.firstName} ${p.lastName||''}`.trim();
+  });
+
+  // AMOUNT SELECTION
+  window.selectAmount = (btn, amount) => {
+    document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    const customGroup = document.getElementById('customAmountGroup');
+    if (amount === 0) {
+      customGroup.style.display = 'block';
+      selectedAmount = 0;
+    } else {
+      customGroup.style.display = 'none';
+      selectedAmount = amount;
+      updateDonateBtn();
+    }
+  };
+
+  function updateDonateBtn() {
+    const amt = selectedAmount || parseInt(document.getElementById('customAmount')?.value)||0;
+    const btn = document.getElementById('donateBtn');
+    btn.textContent = amt > 0 ? `Donate ₹${amt.toLocaleString()} Now ❤️` : 'Donate Now ❤️';
+  }
+
+  document.getElementById('customAmount')?.addEventListener('input', () => {
+    selectedAmount = parseInt(document.getElementById('customAmount').value)||0;
+    updateDonateBtn();
+  });
+
+  // CAUSE SELECTION
+  window.selectCause = (btn) => {
+    document.querySelectorAll('.cause-chip').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  };
+
+  // SELECT CAMPAIGN FROM CAMPAIGN CARD
+  window.selectCampaign = (name) => {
+    document.getElementById('formSub').textContent = `Supporting: ${name}`;
+    document.getElementById('donate-form-card')?.scrollIntoView({behavior:'smooth'});
+    document.querySelector('.donate-form-card').scrollIntoView({behavior:'smooth'});
+  };
+
+  // SUBMIT DONATION
+  window.submitDonation = async () => {
+    const amt   = selectedAmount || parseInt(document.getElementById('customAmount')?.value)||0;
+    const name  = document.getElementById('donorName').value.trim();
+    const email = document.getElementById('donorEmail').value.trim();
+    const msg   = document.getElementById('donorMsg').value.trim();
+    const anon  = document.getElementById('anonToggle').checked;
+    const cause = document.querySelector('.cause-chip.selected')?.textContent || 'Any Cause';
+
+    if (amt <= 0) { alert('Please select or enter a donation amount.'); return; }
+    if (!name)    { alert('Please enter your name.'); return; }
+
+    const btn = document.getElementById('donateBtn');
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+
+    try {
+      await addDoc(collection(db, 'donations'), {
+        amount: amt, donorName: anon ? 'Anonymous' : name,
+        email, message: msg, cause,
+        campaign: document.getElementById('formSub').textContent,
+        createdAt: serverTimestamp()
+      });
+    } catch(e) { console.log('Saved locally'); }
+
+    document.getElementById('modalMsg').textContent =
+      `Your donation of ₹${amt.toLocaleString()} for "${cause}" has been received. A receipt has been sent to ${email||'your email'}. You're making a real difference! 💚`;
+    document.getElementById('successModal').classList.add('show');
+
+    btn.disabled = false;
+    btn.textContent = `Donate ₹${amt.toLocaleString()} Now ❤️`;
+  };
+
+  window.closeModal = () => {
+    document.getElementById('successModal').classList.remove('show');
+  };
+
+  // theme
+  document.getElementById('themeBtn').addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = dark ? 'light' : 'dark';
+
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+
+  localStorage.setItem('ksTheme', next);
+});
+</script>
+
+<script>
+/* ── KARSEVA MAGIC DYNAMICS ── */
+(function(){
+  /* ── SCROLL REVEAL ── */
+  const style=document.createElement('style');
+  style.textContent=`
+    .ks-reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal.ks-in{opacity:1;transform:none;}
+    .ks-reveal-l{opacity:0;transform:translateX(-30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-l.ks-in{opacity:1;transform:none;}
+    .ks-reveal-r{opacity:0;transform:translateX(30px);transition:opacity .65s ease,transform .65s cubic-bezier(.34,1.2,.64,1);}
+    .ks-reveal-r.ks-in{opacity:1;transform:none;}
+    @keyframes ks-shimmer{0%,100%{opacity:.55}50%{opacity:1}}
+    @keyframes ks-popIn{0%{opacity:0;transform:scale(.85) translateY(16px)}100%{opacity:1;transform:none}}
+    @keyframes ks-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes ks-pulse-ring{0%{box-shadow:0 0 0 0 rgba(0,200,150,.4)}70%{box-shadow:0 0 0 10px rgba(0,200,150,0)}100%{box-shadow:0 0 0 0 rgba(0,200,150,0)}}
+    @keyframes ks-spin{to{transform:rotate(360deg)}}
+    .ks-float{animation:ks-float 3.5s ease-in-out infinite;}
+    .ks-pulse{animation:ks-pulse-ring 2s ease-out infinite;}
+    .ks-pop{animation:ks-popIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+    /* card hover lift */
+    .stat-card,.section-card,.f-card,.task-card,.ngo-card,.badge-item,.lb-table-wrap,.bw-item,.podium-card,.city-card,.tov-card,.auth-box,.form-card,.ai-panel,.post-card,.community-card,.donate-card{transition-property:transform,border-color,box-shadow,background!important;transition-duration:.28s!important;}
+    .stat-card:hover,.section-card:hover,.task-card:hover,.ngo-card:hover,.badge-item:hover,.bw-item:hover,.podium-card:hover,.city-card:hover,.tov-card:hover,.community-card:hover,.donate-card:hover{transform:translateY(-4px)!important;box-shadow:0 12px 32px rgba(0,200,150,.1)!important;}
+    .badge-item:hover .badge-emoji{display:inline-block;animation:ks-float 1.2s ease-in-out infinite;}
+    /* button shimmer */
+    .btn-submit,.btn-hero,.btn-post,.btn-cta1,.btn-match,.match-assign-btn,.btn-dashboard,.em-btn,.ai-rec-action{position:relative;overflow:hidden;}
+    .btn-submit::after,.btn-hero::after,.btn-post::after,.btn-cta1::after,.btn-match::after,.match-assign-btn::after,.btn-dashboard::after,.em-btn::after,.ai-rec-action::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);transform:translateX(-200%);transition:transform .45s;}
+    .btn-submit:hover::after,.btn-hero:hover::after,.btn-post:hover::after,.btn-cta1:hover::after,.btn-match:hover::after,.match-assign-btn:hover::after,.btn-dashboard:hover::after,.em-btn:hover::after,.ai-rec-action:hover::after{transform:translateX(200%);}
+    /* nav item left-bar indicator */
+    .nav-item.active{border-left:3px solid var(--accent);padding-left:9px;transition:all .2s;}
+    /* input focus ring */
+    .form-input:focus,.lb-search:focus{box-shadow:0 0 0 3px rgba(0,200,150,.15)!important;}
+    /* progress bar */
+    #ks-progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:9999;width:0%;transition:width .1s linear;box-shadow:0 0 6px rgba(0,200,150,.6);}
+    /* ripple */
+    .ks-ripple{position:absolute;border-radius:50%;background:rgba(0,200,150,.25);transform:scale(0);animation:ks-rippleAnim .55s linear;pointer-events:none;}
+    @keyframes ks-rippleAnim{to{transform:scale(4);opacity:0;}}
+  `;
+  document.head.appendChild(style);
+
+  /* ── PROGRESS BAR ── */
+  const pb=document.createElement('div');pb.id='ks-progress';document.body.prepend(pb);
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement.scrollHeight-innerHeight;
+    if(h>0) pb.style.width=(scrollY/h*100)+'%';
+  });
+
+  /* ── SCROLL REVEAL OBSERVER ── */
+  // tag eligible elements
+  const selectors=['.stat-card','.section-card','.task-card','.task-item','.lb-row:not(.header)','.badge-item','.bw-item','.podium-card','.city-card','.tov-card','.ngo-card','.f-card','.step-card','.activity-item','.pstat','.match-card','.donate-card','.community-card','.post-card','.ai-rec-card','.form-card','.auth-box','.ai-panel'];
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('ks-in'),i*40);
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:.08});
+  setTimeout(()=>{
+    document.querySelectorAll(selectors.join(',')).forEach((el,i)=>{
+      el.classList.add('ks-reveal');
+      el.style.transitionDelay=(i%6)*0.04+'s';
+      obs.observe(el);
+    });
+  },100);
+
+  /* ── RIPPLE ON BUTTONS ── */
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('button');
+    if(!btn) return;
+    const r=btn.getBoundingClientRect(),sz=Math.max(r.width,r.height);
+    const rip=document.createElement('span');
+    rip.className='ks-ripple';
+    rip.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px`;
+    btn.appendChild(rip);
+    setTimeout(()=>rip.remove(),560);
+    // click sparks
+    for(let i=0;i<8;i++){
+      const s=document.createElement('div');
+      const a=Math.random()*Math.PI*2,d=20+Math.random()*35;
+      s.style.cssText=`position:fixed;pointer-events:none;z-index:9997;width:4px;height:4px;border-radius:50%;background:var(--accent);left:${e.clientX}px;top:${e.clientY}px;transform:translate(-50%,-50%);transition:all .5s cubic-bezier(.1,.8,.2,1)`;
+      document.body.appendChild(s);
+      requestAnimationFrame(()=>{s.style.transform=`translate(${Math.cos(a)*d-2}px,${Math.sin(a)*d-2}px)`;s.style.opacity='0';s.style.width='2px';s.style.height='2px';});
+      setTimeout(()=>s.remove(),510);
+    }
+  });
+
+  /* ── TILT CARDS ── */
+  document.querySelectorAll('.stat-card,.badge-item,.podium-card,.city-card,.f-card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`translateY(-4px) rotateX(${-y*6}deg) rotateY(${x*6}deg)`;
+      card.style.transformStyle='preserve-3d';
+    });
+    card.addEventListener('mouseleave',()=>{card.style.transform='';});
+  });
+
+  /* ── COUNTER ANIMATION ── */
+  function animateCounter(el,target,suffix){
+    let start=null,orig=el.textContent;
+    const fmt=n=>n.toLocaleString()+suffix;
+    const step=ts=>{
+      if(!start)start=ts;
+      const p=Math.min((ts-start)/1400,1),ease=1-Math.pow(1-p,3);
+      el.textContent=fmt(Math.round(ease*target));
+      if(p<1)requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  const cObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const el=e.target;
+      const raw=el.textContent.replace(/,/g,'');
+      const num=parseFloat(raw);
+      const suffix=raw.replace(/[\d.]/g,'').replace(num.toString().replace(/,/g,''),'');
+      if(!isNaN(num)&&num>10)animateCounter(el,num,suffix);
+      cObs.unobserve(el);
+    });
+  },{threshold:.5});
+  document.querySelectorAll('.stat-card-num,.stat-num,.podium-pts,.lb-pts,.lb-pts-val,.yrb-pts,.pstat-num').forEach(el=>cObs.observe(el));
+
+  /* ── SIDEBAR NAV SLIDE ── */
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('mouseenter',()=>{item.style.paddingLeft='16px';});
+    item.addEventListener('mouseleave',()=>{if(!item.classList.contains('active'))item.style.paddingLeft='';});
+  });
+
+  /* ── INPUT FOCUS LABELS ── */
+  document.querySelectorAll('.form-input').forEach(inp=>{
+    inp.addEventListener('focus',()=>{inp.style.background='var(--surface)';});
+    inp.addEventListener('blur',()=>{inp.style.background='';});
+  });
+
+  /* ── THEME TOGGLE SPIN ── */
+  const tBtn=document.getElementById('themeBtn');
+  if(tBtn){
+    tBtn.addEventListener('click',()=>{
+      tBtn.style.transform='rotate(360deg)';
+      tBtn.style.transition='transform .4s cubic-bezier(.34,1.56,.64,1)';
+      setTimeout(()=>{tBtn.style.transform='';},420);
+    });
+  }
+
+  /* ── STAT CARD ACCENT BAR ── */
+  document.querySelectorAll('.stat-card').forEach(c=>{
+    const bar=document.createElement('div');
+    bar.style.cssText='position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);border-radius:0 0 14px 14px;transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.77,0,.18,1);';
+    c.style.position='relative';c.style.overflow='hidden';
+    c.appendChild(bar);
+    c.addEventListener('mouseenter',()=>{bar.style.transform='scaleX(1)';});
+    c.addEventListener('mouseleave',()=>{bar.style.transform='scaleX(0)';});
+  });
+
+  /* ── BADGE FLOAT ON HOVER ── */
+  document.querySelectorAll('.badge-emoji,.pb,.bw-emoji').forEach(em=>{
+    em.addEventListener('mouseenter',()=>{em.style.animation='ks-float 1s ease-in-out infinite';em.style.display='inline-block';});
+    em.addEventListener('mouseleave',()=>{em.style.animation='';});
+  });
+
+  /* ── AVATAR PULSE ON HOVER ── */
+  document.querySelectorAll('.user-av,.lb-av,.ngo-av,.match-av,.podium-av,.yrb-av').forEach(av=>{
+    av.addEventListener('mouseenter',()=>{av.style.animation='ks-pulse-ring 1s ease-out infinite';});
+    av.addEventListener('mouseleave',()=>{av.style.animation='';});
+  });
+
+  /* ── EMERGENCY BANNER ATTENTION SHAKE ── */
+  const em=document.getElementById('emergencyBanner');
+  if(em&&!em.classList.contains('hidden')){
+    const shakeStyle=document.createElement('style');
+    shakeStyle.textContent='@keyframes ks-shake{0%,100%{transform:none}10%,30%,50%,70%,90%{transform:translateX(-4px)}20%,40%,60%,80%{transform:translateX(4px)}}';
+    document.head.appendChild(shakeStyle);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},1200);
+    setTimeout(()=>{em.style.animation='ks-shake .5s ease';setTimeout(()=>{em.style.animation='';},500);},5000);
+  }
+
+  /* ── LB ROW HOVER RANK HIGHLIGHT ── */
+  document.querySelectorAll('.lb-row:not(.header):not(.you)').forEach(row=>{
+    row.addEventListener('mouseenter',()=>{row.style.background='var(--surface2)';row.style.paddingLeft='28px';row.style.transition='all .2s';});
+    row.addEventListener('mouseleave',()=>{row.style.background='';row.style.paddingLeft='';});
+  });
+
+  /* ── PODIUM CROWN FLOAT ── */
+  document.querySelectorAll('.podium-crown').forEach(c=>{
+    c.style.display='inline-block';c.style.animation='ks-float 2.5s ease-in-out infinite';
+    c.style.animationDelay=Math.random()*.8+'s';
+  });
+
+  /* ── BLINK DOT PULSE ── */
+  document.querySelectorAll('.em-dot,.badge-dot,.ai-dot,.tag-dot').forEach(dot=>{
+    dot.style.boxShadow='0 0 0 0 rgba(0,200,150,.4)';
+    dot.style.animation='blink 2s infinite, ks-pulse-ring 2s ease-out infinite';
+  });
+
+  /* ── TASK CARD URGENCY PULSE ── */
+  document.querySelectorAll('.task-status.urgent,.urgency.high').forEach(el=>{
+    el.style.animation='ks-shimmer 1.6s ease-in-out infinite';
+  });
+
+  /* ── PAGE ENTRY FADE ── */
+  document.body.style.opacity='0';
+  document.body.style.transition='opacity .4s ease';
+  window.addEventListener('load',()=>{document.body.style.opacity='1';});
+
+  /* ── SMOOTH LINK TRANSITIONS ── */
+  document.querySelectorAll('[onclick*="location.href"],[onclick*="window.location"]').forEach(el=>{
+    el.addEventListener('click',e=>{
+      e.preventDefault();
+      const match=el.getAttribute('onclick').match(/href='([^']+)'/);
+      if(match){
+        document.body.style.opacity='0';
+        setTimeout(()=>{window.location.href=match[1];},300);
+      }
+    });
+  });
+
+})();
+</script>
+
+<style>
+/* donate specific */
+/* amount chips hover */
+[class*="amount"],[class*="preset"],[class*="amt-chip"]{transition:all .22s cubic-bezier(.34,1.56,.64,1);}
+[class*="amount"]:hover,[class*="preset"]:hover,[class*="amt-chip"]:hover{transform:translateY(-3px) scale(1.06);border-color:var(--accent)!important;}
+[class*="amount"].active,[class*="preset"].active,[class*="amt-chip"].selected{animation:ks-popIn .25s both;box-shadow:0 0 0 3px rgba(0,200,150,.2);}
+/* donate card glow */
+[class*="donate-card"],[class*="ngo-donate"]{transition:all .3s!important;}
+[class*="donate-card"]:hover,[class*="ngo-donate"]:hover{transform:translateY(-5px)!important;box-shadow:0 16px 40px rgba(0,200,150,.12)!important;}
+/* heart icon float */
+[class*="heart-icon"],span:contains("❤"),div:contains("❤"){animation:ks-float 2.5s ease-in-out infinite;}
+/* progress bars animate */
+[class*="progress-fill"],[class*="raised-bar"]{transition:width 1.2s cubic-bezier(.34,1.2,.64,1)!important;}
+/* donate button big glow */
+[class*="btn-donate"],[class*="donate-btn"]{transition:all .25s!important;box-shadow:0 0 0 0 rgba(0,200,150,.4);}
+[class*="btn-donate"]:hover,[class*="donate-btn"]:hover{box-shadow:0 0 0 6px rgba(0,200,150,.15),0 4px 20px rgba(0,200,150,.2)!important;transform:translateY(-2px) scale(1.03)!important;}
+/* impact number sparkle */
+[class*="impact-num"],[class*="raised-num"]{color:var(--accent);animation:ks-shimmer 2s ease-in-out infinite;}
+/* success animation */
+[class*="success"]:not(.btn-submit):not(.msg-box){animation:ks-popIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+</style>
+<script>
+(function(){
+  /* animate progress bars when visible */
+  const fills=document.querySelectorAll('[class*="progress-fill"],[class*="raised-bar"],[class*="fill"]');
+  const pObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const el=e.target;
+      const w=el.style.width;
+      el.style.width='0%';
+      setTimeout(()=>{el.style.width=w;},150);
+      pObs.unobserve(el);
+    });
+  },{threshold:.3});
+  fills.forEach(f=>pObs.observe(f));
+  /* stagger donate ngo cards */
+  document.querySelectorAll('[class*="donate-card"],[class*="ngo-donate"],[class*="campaign"]').forEach((c,i)=>{
+    c.style.opacity='0';c.style.transform='translateY(18px)';
+    c.style.transition=`opacity .5s ${i*.08}s ease,transform .5s ${i*.08}s cubic-bezier(.34,1.2,.64,1)`;
+    setTimeout(()=>{c.style.opacity='1';c.style.transform='none';},100+i*80);
+  });
+  /* amount chip click pulse */
+  document.querySelectorAll('[class*="amount"],[class*="preset"],[class*="amt"]').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      chip.style.transform='scale(.92)';
+      setTimeout(()=>{chip.style.transform='';},150);
+    });
+  });
+})();
+</script>
+</body>
+</html>
