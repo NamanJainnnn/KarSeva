@@ -436,7 +436,7 @@
     document.getElementById('sidebarRole').textContent = p.role === 'ngo' ? 'NGO Admin' : 'Volunteer';
     if (p.role === 'ngo') document.getElementById('adminNav').style.display = 'flex';
     const ngoTab = document.getElementById('myNgoTab');
-    if (ngoTab) ngoTab.style.display = profile.role === 'ngo' ? 'flex' : 'none';
+    if (ngoTab) ngoTab.style.display = p.role === 'ngo' ? 'flex' : 'none';
 
     // profile card
     document.getElementById('profileAv').textContent   = initials;
