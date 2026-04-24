@@ -51,6 +51,12 @@ KarSeva provides a centralized platform where:
 
 ---
 
+##🎯 UN SDG Alignment
+SDG 17 — Partnerships for the Goals (core — connecting NGOs & volunteers)
+SDG 11 — Sustainable Cities & Communities
+SDG 10 — Reduced Inequalities
+---
+
 ## ✨ Key Features
 
 * 🔐 Firebase Authentication
