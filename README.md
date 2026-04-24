@@ -8,7 +8,6 @@ Built for real-world impact, KarSeva helps NGOs, local organizations, and commun
 
 ## 🚀 Live Demo
 
-Add your deployed link here:
 https://karseva.vercel.app
 
 ---
