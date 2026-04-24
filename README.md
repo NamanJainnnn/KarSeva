@@ -125,4 +125,3 @@ Naman Jain
 ## ❤️ Vision
 KarSeva aims to make volunteering smarter, faster, and more accessible — empowering communities through technology.
 
-KarSeva aims to make volunteering smarter, faster, and more accessible — empowering communities through technology.
