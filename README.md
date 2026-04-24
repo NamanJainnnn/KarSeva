@@ -87,25 +87,6 @@ KarSeva provides a centralized platform where:
 
 ---
 
-## 📂 Project Structure
-
-```text
-KarSeva/
-├── api/
-│   └── gemini-proxy.js
-├── index.html
-├── auth.html
-├── dashboard.html
-├── tasks.html
-├── leaderboard.html
-├── PROFILE.html
-├── ngoprofile.html
-├── settings.html
-└── other pages...
-```
-
----
-
 ## 🔄 User Flow
 
 1. User signs up as Volunteer or NGO
