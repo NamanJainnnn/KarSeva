@@ -8,7 +8,9 @@ Built for real-world impact, KarSeva helps NGOs, local organizations, and commun
 
 ## 🚀 Live Demo
 
-https://karseva.vercel.app
+website: https://karseva.vercel.app
+Presentation: https://drive.google.com/file/d/1NGm5TVqHyBj6wZPrwOvzHUYzU8JFfmQv/view?usp=sharing
+Demo Video: https://drive.google.com/file/d/1HPL719ba_PWUPdjZFyLvbBD-cQ5F77yX/view?usp=drivesdk
 
 ---
 
